@@ -23,7 +23,7 @@ class SearchByIngredientsRequest:
 
     def __init__(self, ingredients):
         self.ingredients = ingredients
-        self.dish_number = 2
+        self.dish_number = 10
         self.row_json = self._get_row_json()
 
     def _get_row_json(self):
@@ -38,14 +38,15 @@ class SearchByIngredientsRequest:
         )
         return response.json()
 
-    def get_dish_title(self):
-        return self.row_json[0]['title']
+    def get_all_dishes(self):
+        dishes = []
+        for i in range(self.dish_number):
+            title = self.row_json[i]['title']
+            dish_id = self.row_json[i]['id']
+            image_url = self.row_json[i]['image']
+            dishes.append((title, dish_id, image_url))
 
-    def get_dish_id(self):
-        return self.row_json[0]['id']
-
-    def get_dish_image(self):
-        return self.row_json[0]['image']
+        return dishes
 
     def get_dish_ingredients(self):
         # besides instructions, we are also need a list of ingred
@@ -55,8 +56,8 @@ class SearchByIngredientsRequest:
 class GetRecipeInstructionsRequest:
 
     def __init__(self, dish_id):
-        self.dish_id = 640352
-        self.api_url = f'https://api.spoonacular.com/recipes/{self.dish_id}/analyzedInstructions'
+        self.dish_id = dish_id
+        self.api_url = f'https://api.spoonacular.com/recipes/{dish_id}/analyzedInstructions'
         self.row_json = self._get_row_json()
 
     def _get_row_json(self):
@@ -67,10 +68,20 @@ class GetRecipeInstructionsRequest:
             self.api_url,
             params,
         )
-        print(response.url)
         return response.json()
 
-    def get_instructions(self):
-        steps = self.row_json[0]['steps']
+    def is_recipe_existed(self):
+        try:
+            self.row_json[0]['steps']
+        except IndexError:
+            return False
+
+    def get_instruction(self):
+        try:
+            steps = self.row_json[0]['steps']
+        except IndexError:
+            return None
+        instruction = []
         for i in range(len(steps)):
-            print(f'{i}) {steps[i]["step"]}')
+            instruction.append(steps[i]["step"])
+        return instruction

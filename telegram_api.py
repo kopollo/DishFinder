@@ -7,6 +7,8 @@ from aiogram.dispatcher.filters import Text, Command
 
 from markup import FindDishState, start_kb, choose_kb, more_kb
 
+# from controller import controller
+
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 storage = MemoryStorage()
 bot = Bot(TELEGRAM_TOKEN)
