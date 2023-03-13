@@ -7,7 +7,7 @@ from aiogram.dispatcher.filters import Text, Command
 
 from markup import FindDishState, start_kb, choose_kb, more_kb
 
-# from controller import controller
+from controller import DishBotController
 
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 storage = MemoryStorage()
@@ -41,10 +41,13 @@ async def start(message: types.Message):
 async def process_ingredients(message: types.Message, state: FSMContext):
     ingredients = message.text
     await message.answer(ingredients)
+    data = DishBotController()
+    data.run(1)
+    image_url = data.answer[0]['image_url']
     await bot.send_photo(
         chat_id=message.from_user.id,
         reply_markup=choose_kb,
-        photo='https://cdn.britannica.com/39/7139-050-A88818BB/Himalayan-chocolate-point.jpg'
+        photo=image_url,
     )
     await state.finish()
 

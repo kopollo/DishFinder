@@ -70,17 +70,14 @@ class GetRecipeInstructionsRequest:
         )
         return response.json()
 
-    def is_recipe_existed(self):
-        try:
-            self.row_json[0]['steps']
-        except IndexError:
-            return False
-
     def get_instruction(self):
         try:
             steps = self.row_json[0]['steps']
         except IndexError:
             return None
+        if len(steps) <= 1:
+            return None
+
         instruction = []
         for i in range(len(steps)):
             instruction.append(steps[i]["step"])
