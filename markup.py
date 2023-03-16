@@ -4,7 +4,8 @@ from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, \
 
 
 class FindDishState(StatesGroup):
-    ingredients = State()
+    enter_ingredients = State()
+    more_info = State()
 
 
 class StartKeyboard:
@@ -20,8 +21,8 @@ class StartKeyboard:
 class ChooseDishKeyboard:
     choose_kb = InlineKeyboardMarkup(row_width=3)
     back_btn = InlineKeyboardButton(
-        text='back',
-        callback_data='back'
+        text='prev',
+        callback_data='prev'
     )
     next_btn = InlineKeyboardButton(
         text='next',
@@ -41,15 +42,15 @@ class ChooseDishKeyboard:
 
 class MoreInfoKeyboard:
     more_kb = InlineKeyboardMarkup()
-    yes_btn = InlineKeyboardButton(
-        text='yes',
-        callback_data='yes'
+    back_btn = InlineKeyboardButton(
+        text='back',
+        callback_data='back'
     )
-    no_btn = InlineKeyboardButton(
-        text='no',
-        callback_data='no',
+    save_btn = InlineKeyboardButton(
+        text='save recipe',
+        callback_data='save',
     )
-    more_kb.add(yes_btn, no_btn)
+    more_kb.add(back_btn, save_btn)
 
 
 start_kb = StartKeyboard.start_kb
