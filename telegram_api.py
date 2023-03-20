@@ -74,7 +74,7 @@ async def find_dish(message: types.Message, state: FSMContext):
                 image_url=dish.image_url,
                 title=dish.title,
             )
-        except IndexError:
+        except IndexError: # dont work. need async version???
             print('no dishes')
 
 
