@@ -33,3 +33,6 @@ class DBManager:
 
     def get_all_user_dishes(self):
         pass
+
+
+db_manager = DBManager()
