@@ -4,14 +4,18 @@ import aiogram
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text, Command
+from aiogram.dispatcher.filters import Text
 import logging
 
 from aiogram.dispatcher.storage import FSMContextProxy
 
+from db.users import UserModel
+from db.dishes import DishModel
 from markup import FindDishState, start_kb, choose_kb, more_kb
 
-from controller import DishBotController
+from controller import DishBotController, DishApiRepr
+
+from db_manager import DBManager
 
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 storage = MemoryStorage()
@@ -19,6 +23,9 @@ bot = Bot(TELEGRAM_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 
 logging.basicConfig(level=logging.DEBUG)
+
+controller = DishBotController()
+db_manager = DBManager()
 
 
 async def on_startup(_):
@@ -37,6 +44,12 @@ async def find_dish_event(message: types.Message, state: FSMContext):
     await message.delete()
 
 
+@dp.message_handler(Text(equals='History'))
+async def find_dish_event(message: types.Message):
+    db_manager.test_print_dish()
+    await message.delete()
+
+
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
     await bot.send_message(
@@ -44,6 +57,8 @@ async def start(message: types.Message):
         text='HI HI HI HI',
         reply_markup=start_kb,
     )
+    user = UserModel(tg_id=message.from_user.id)
+    db_manager.add_user(user)
 
 
 test_input = 'apples,flour,sugar'
@@ -61,7 +76,6 @@ async def show_dish_info(title, image_url, chat_id):
 @dp.message_handler(state=FindDishState.enter_ingredients)
 async def find_dish(message: types.Message, state: FSMContext):
     ingredients = message.text
-    controller = DishBotController()
     controller.run(test_input)
     dishes = controller.get_dishes()
     await message.answer(ingredients)
@@ -74,14 +88,24 @@ async def find_dish(message: types.Message, state: FSMContext):
                 image_url=dish.image_url,
                 title=dish.title,
             )
-        except IndexError: # dont work. need async version???
+        except IndexError:  # dont work. need async version???
             print('no dishes')
+
+
+def _add_dish_to_db(dish: DishApiRepr):
+    dish_model = DishModel(
+        id=dish.id,
+        title=dish.title,
+        image_url=dish.image_url,
+        instruction=dish.instruction
+    )
+    db_manager.add_dish(dish_model)
 
 
 @dp.callback_query_handler(state=FindDishState.more_info)
 async def more_info_state(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
-        dish = _get_cur_dish(data)
+        dish: DishApiRepr = _get_cur_dish(data)
 
     if callback.data == 'back':
         await callback.message.delete()
@@ -96,8 +120,8 @@ async def more_info_state(callback: types.CallbackQuery, state: FSMContext):
         await callback.answer('back')
 
     elif callback.data == 'save':
-        # TODO
-        await callback.answer('save')
+        _add_dish_to_db(dish)
+        await callback.answer('SAVED!')
 
 
 async def to_start(callback):
@@ -107,7 +131,7 @@ async def to_start(callback):
     await callback.answer()
 
 
-async def show_new_dish(callback: types.CallbackQuery, dish):
+async def update_dish_message(callback: types.CallbackQuery, dish):
     photo = types.InputMediaPhoto(media=dish.image_url,
                                   caption=dish.title)
     try:
@@ -122,8 +146,18 @@ async def show_new_dish(callback: types.CallbackQuery, dish):
         pass
 
 
-def _get_cur_dish(data: FSMContextProxy):  # ?? state.proxy()
+def _get_cur_dish(data: FSMContextProxy):
     return data['dishes'][data['cur_dish_id']]
+
+
+def _next_dish(data: FSMContextProxy):
+    cur_dish_id = data['cur_dish_id']
+    data['cur_dish_id'] = min(cur_dish_id + 1, len(data['dishes']) - 1)
+
+
+def _prev_dish(data: FSMContextProxy):
+    cur_dish_id = data['cur_dish_id']
+    data['cur_dish_id'] = max(cur_dish_id - 1, 0)
 
 
 @dp.callback_query_handler(state=FindDishState.enter_ingredients)
@@ -132,39 +166,26 @@ async def dish_list_keyboard_handler(
         state: FSMContext):
     if callback.data == 'prev':
         async with state.proxy() as data:
-            cur_dish_id = data['cur_dish_id']
-            data['cur_dish_id'] = max(cur_dish_id - 1, 0)
+            _prev_dish(data)
             dish = _get_cur_dish(data)
-
-            await show_new_dish(callback, dish)
+            await update_dish_message(callback, dish)
             await callback.answer('prev')
 
     elif callback.data == 'next':
         async with state.proxy() as data:
-            cur_dish_id = data['cur_dish_id']
-            data['cur_dish_id'] = min(cur_dish_id + 1, len(data['dishes']) - 1)
+            _next_dish(data)
             dish = _get_cur_dish(data)
-            await show_new_dish(callback, dish)
+            await update_dish_message(callback, dish)
             await callback.answer('next')
 
     elif callback.data == 'more':
         await callback.message.delete()
         async with state.proxy() as data:
             dish = _get_cur_dish(data)
-
-            # GOOD IDEA, BUT CAPTION < 1024 char allow
-
-            # await callback.message.answer_photo(
-            #     caption=dish.instruction,
-            #     reply_markup=more_kb,
-            #     photo=dish.image_url,
-            # )
-
             await callback.message.answer(
                 text=dish.instruction,
                 reply_markup=more_kb,
             )
-
         await FindDishState.more_info.set()
         await callback.answer()
 

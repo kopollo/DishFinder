@@ -6,7 +6,7 @@ from sqlalchemy import orm
 from .db_session import SqlAlchemyBase
 
 
-class User(SqlAlchemyBase):
+class UserModel(SqlAlchemyBase):
     __tablename__ = 'users'
 
     tg_id = sqlalchemy.Column(

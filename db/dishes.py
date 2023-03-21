@@ -3,7 +3,7 @@ import sqlalchemy
 from .db_session import SqlAlchemyBase
 
 
-class Dish(SqlAlchemyBase):
+class DishModel(SqlAlchemyBase):
     __tablename__ = 'dishes'
 
     id = sqlalchemy.Column(
