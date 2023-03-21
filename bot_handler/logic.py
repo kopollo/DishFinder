@@ -2,34 +2,26 @@ import os
 
 import aiogram
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-import logging
-
-from aiogram.dispatcher.storage import FSMContextProxy
-
+from bot_handler.setup import bot, dp, controller
 from db.users import UserModel
 from db.dishes import DishModel
 from bot_handler.markup import FindDishState, start_kb, choose_kb, more_kb
 
 from controller import DishBotController, DishApiRepr
 
-from db_manager import db_manager
-from bot_handler.bot_utils import *
-
-TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
-storage = MemoryStorage()
-bot = Bot(TELEGRAM_TOKEN)
-dp = Dispatcher(bot, storage=storage)
-
-logging.basicConfig(level=logging.DEBUG)
-
-controller = DishBotController()
+from bot_handler.utils import *
 
 
-async def on_startup(_):
-    print('RUNNING')
+async def show_cur_dish_info(data):
+    dish = get_cur_dish(data)
+    await bot.send_photo(
+        chat_id=data['chat_id'],
+        reply_markup=choose_kb,
+        photo=dish.image_url,
+        caption=dish.title,
+    )
 
 
 @dp.message_handler(Text(equals='Find dish'))
@@ -62,16 +54,6 @@ async def start(message: types.Message, state: FSMContext):
 
 
 test_input = 'apples,flour,sugar'
-
-
-async def show_cur_dish_info(data):
-    dish = get_cur_dish(data)
-    await bot.send_photo(
-        chat_id=data['chat_id'],
-        reply_markup=choose_kb,
-        photo=dish.image_url,
-        caption=dish.title,
-    )
 
 
 @dp.message_handler(state=FindDishState.enter_ingredients)
@@ -161,6 +143,10 @@ async def dish_list_keyboard_handler(
         await to_start(callback)
         await state.finish()
         # Need i to clean context storage?
+
+
+async def on_startup(_):
+    print('RUNNING')
 
 
 def run():

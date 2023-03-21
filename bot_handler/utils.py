@@ -1,10 +1,9 @@
 from aiogram.dispatcher.storage import FSMContextProxy
 
+from bot_handler.setup import db_manager
 from controller import DishApiRepr
 from db.dishes import DishModel
 from db.users import UserModel
-
-from db_manager import db_manager
 
 
 def get_cur_dish(data: FSMContextProxy):
@@ -27,10 +26,10 @@ def prev_dish(data: FSMContextProxy):
 
 def save_dish_event(dish_model: DishModel, user_model: UserModel):
     db_manager.add_dish(dish_model)
-    # db_manager.add_user_to_dish_association(
-    #     dish=dish_model,
-    #     user=user_model,
-    # )
+    db_manager.add_user_to_dish_association(
+        dish_id=dish_model.id,
+        user_id=user_model.tg_id,
+    )
 
 
 def from_dish_api_repr(dish: DishApiRepr):
@@ -41,3 +40,4 @@ def from_dish_api_repr(dish: DishApiRepr):
         instruction=dish.instruction
     )
     return dish_model
+

@@ -22,17 +22,16 @@ class DBManager:
         for i in dish:
             print(i)
 
-    def add_user_to_dish_association(self, user: UserModel, dish: DishModel):
+    def add_user_to_dish_association(self,
+                                     user_id: UserModel,
+                                     dish_id: DishModel):
         db_sess = db_session.create_session()
         association = UsersToDishesModel(
-            user=user,
-            dish=dish,
+            user_id=user_id,
+            dish_id=dish_id,
         )
         db_sess.merge(association)
         db_sess.commit()
 
     def get_all_user_dishes(self):
         pass
-
-
-db_manager = DBManager()
