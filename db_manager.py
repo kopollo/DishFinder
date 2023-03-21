@@ -1,6 +1,7 @@
 from db import db_session
 from db.dishes import DishModel
 from db.users import UserModel
+from db.users_to_dishes import UsersToDishesModel
 
 
 class DBManager:
@@ -20,3 +21,15 @@ class DBManager:
         dish = db_sess.query(DishModel).all()
         for i in dish:
             print(i)
+
+    def add_user_to_dish_association(self, user: UserModel, dish: DishModel):
+        db_sess = db_session.create_session()
+        association = UsersToDishesModel(
+            user=user,
+            dish=dish,
+        )
+        db_sess.merge(association)
+        db_sess.commit()
+
+    def get_all_user_dishes(self):
+        pass
