@@ -1,27 +1,7 @@
-import os
-
-import aiogram
-from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-from bot_handler.setup import bot, dp, controller
-from db.users import UserModel
-from db.dishes import DishModel
-from bot_handler.markup import FindDishState, start_kb, choose_kb, more_kb
-
-from controller import DishBotController, DishApiRepr
 
 from bot_handler.utils import *
-
-
-async def show_cur_dish_info(data):
-    dish = get_cur_dish(data)
-    await bot.send_photo(
-        chat_id=data['chat_id'],
-        reply_markup=choose_kb,
-        photo=dish.image_url,
-        caption=dish.title,
-    )
 
 
 @dp.message_handler(Text(equals='Find dish'))
@@ -47,6 +27,7 @@ async def start(message: types.Message, state: FSMContext):
     )
     user = UserModel(tg_id=message.from_user.id)
     db_manager.add_user(user)
+    # create a separate function proxy_init()
     async with state.proxy() as data:
         data['chat_id'] = message.from_user.id
         data['cur_dish_id'] = 0
@@ -88,32 +69,11 @@ async def more_info_state(callback: types.CallbackQuery, state: FSMContext):
         await callback.answer('SAVED!')
 
 
-async def to_start(callback: types.CallbackQuery):
-    await callback.message.answer(text='BACK TO MAIN',
-                                  reply_markup=start_kb)
-    await callback.message.delete()
-    await callback.answer()
-
-
-async def update_dish_message(callback: types.CallbackQuery, dish):
-    photo = types.InputMediaPhoto(media=dish.image_url,
-                                  caption=dish.title)
-    try:
-        await bot.edit_message_media(
-            chat_id=callback.from_user.id,
-            message_id=callback.message.message_id,
-            media=photo,
-            reply_markup=choose_kb,
-        )
-    except aiogram.utils.exceptions.MessageNotModified:
-        print('same as before')
-        pass
-
-
 @dp.callback_query_handler(state=FindDishState.enter_ingredients)
 async def dish_list_keyboard_handler(
         callback: types.CallbackQuery,
         state: FSMContext):
+    # don't like - need refactor
     if callback.data == 'prev':
         async with state.proxy() as data:
             prev_dish(data)
