@@ -33,5 +33,8 @@ class DBManager:
         db_sess.merge(association)
         db_sess.commit()
 
-    def get_all_user_dishes(self):
-        pass
+    def get_all_user_dishes(self, user: UserModel):
+        db_sess = db_session.create_session()
+        dishes = db_sess.query(UsersToDishesModel).filter(
+            UsersToDishesModel.user_id == user.tg_id
+        )
