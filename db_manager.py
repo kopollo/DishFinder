@@ -11,6 +11,10 @@ class DBManager:
         db_sess.merge(dish)
         db_sess.commit()
 
+    # def get_dish(self, dish_id: int):
+    # db_sess = db_session.create_session()
+    # db_sess.query(User).filter(User.email == form.email.data).first():
+
     def add_user(self, user: UserModel):
         db_sess = db_session.create_session()
         db_sess.merge(user)
@@ -37,4 +41,11 @@ class DBManager:
         db_sess = db_session.create_session()
         dishes = db_sess.query(UsersToDishesModel).filter(
             UsersToDishesModel.user_id == user.tg_id
-        )
+        ).all()
+        for row in dishes:
+            row: UsersToDishesModel
+            print(row.dish.title)
+        # if db_sess.query(User).filter(User.email == form.email.data).first():
+        # for dish in dishes:
+        #     # dish: UsersToDishesModel
+        #     print(dish.title)

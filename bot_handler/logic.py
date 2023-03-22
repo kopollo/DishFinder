@@ -12,9 +12,10 @@ async def find_dish_event(message: types.Message):
 
 
 @dp.message_handler(Text(equals='History'))
-async def check_history_event(message: types.Message):
+async def check_history_event(message: types.Message, state: FSMContext):
     # TODO
-    # db_manager.test_print_dish()
+    async with state.proxy() as data:
+        db_manager.get_all_user_dishes(get_cur_user(data))
     await message.delete()
 
 
