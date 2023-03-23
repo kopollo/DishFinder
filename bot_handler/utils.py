@@ -1,7 +1,7 @@
 from aiogram.dispatcher.storage import FSMContextProxy
 import aiogram
 from aiogram import types
-
+from dataclasses import dataclass, asdict
 from db import DishModel, UserModel
 from .setup import bot, db_manager
 from .markup import start_kb, choose_kb
@@ -36,12 +36,7 @@ def save_dish_event(dish_model: DishModel, user_model: UserModel):
 
 
 def from_dish_api_repr(dish: DishApiRepr):
-    dish_model = DishModel(
-        id=dish.id,
-        title=dish.title,
-        image_url=dish.image_url,
-        instruction=dish.instruction
-    )
+    dish_model = DishModel(**asdict(dish))
     return dish_model
 
 

@@ -1,15 +1,14 @@
-from .requests_wrapper import SearchByIngredientsRequest, GetRecipeInstructionsRequest
+from .requests_wrapper import SearchByIngredientsRequest, \
+    GetRecipeInstructionsRequest
+from dataclasses import dataclass
 
 
+@dataclass()
 class DishApiRepr:
-    def __init__(self, title, id, image_url, instruction):
-        self.title = title
-        self.id = id
-        self.image_url = image_url
-        self.instruction = instruction
-
-    def __str__(self):
-        return f'<Dish> {self.title} {self.image_url}'
+    title: str
+    id: int
+    image_url: str
+    instruction: str
 
 
 class DishBotController:
@@ -56,7 +55,7 @@ class DishBotController:
                     image_url=image_url,
                     instruction=instruction
                 )
-                print(dish)
+                # print(dish)
                 self.answer.append(dish)
 
     def get_dishes(self):
