@@ -3,8 +3,8 @@ import os
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import logging
-from controller import DishBotController
-from db_manager import DBManager
+from food_api_handler.controller import DishBotController
+from db.db_manager import DBManager
 
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 storage = MemoryStorage()

@@ -1,7 +1,7 @@
-from db import db_session
-from db.dishes import DishModel
-from db.users import UserModel
-from db.users_to_dishes import UsersToDishesModel
+from . import db_session
+from .dishes import DishModel
+from .users import UserModel
+from .users_to_dishes import UsersToDishesModel
 
 
 class DBManager:
@@ -42,6 +42,7 @@ class DBManager:
         dishes = db_sess.query(UsersToDishesModel).filter(
             UsersToDishesModel.user_id == user.tg_id
         ).all()
+        # api_repr_dishes = list()/
         for row in dishes:
             row: UsersToDishesModel
             print(row.dish.title)

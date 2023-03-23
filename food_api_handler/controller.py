@@ -1,4 +1,4 @@
-from food_api import SearchByIngredientsRequest, GetRecipeInstructionsRequest
+from .requests_wrapper import SearchByIngredientsRequest, GetRecipeInstructionsRequest
 
 
 class DishApiRepr:

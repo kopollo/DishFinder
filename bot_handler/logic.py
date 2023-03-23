@@ -1,7 +1,10 @@
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
+from aiogram.utils import executor
 
-from bot_handler.utils import *
+from .setup import *
+from .markup import *
+from .utils import *
 
 
 @dp.message_handler(Text(equals='Find dish'))
@@ -102,8 +105,7 @@ async def dish_list_keyboard_handler(
 
     elif callback.data == 'stop':
         await to_start(callback)
-        await state.finish()
-        # Need i to clean context storage?
+        await state.reset_state(with_data=False)
 
 
 async def on_startup(_):

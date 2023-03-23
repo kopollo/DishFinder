@@ -1,13 +1,12 @@
 from aiogram.dispatcher.storage import FSMContextProxy
-from bot_handler.setup import db_manager
 import aiogram
-from aiogram import Bot, Dispatcher, executor, types
-from bot_handler.setup import bot, dp, controller
-from db.users import UserModel
-from db.dishes import DishModel
-from bot_handler.markup import FindDishState, start_kb, choose_kb, more_kb
+from aiogram import types
 
-from controller import DishBotController, DishApiRepr
+from db import DishModel, UserModel
+from .setup import bot, db_manager
+from .markup import start_kb, choose_kb
+
+from food_api_handler.controller import DishApiRepr
 
 
 def get_cur_dish(data: FSMContextProxy):
@@ -68,7 +67,7 @@ async def update_dish_message(callback: types.CallbackQuery, dish):
         pass
 
 
-async def show_cur_dish_info(data):
+async def show_cur_dish_info(data: FSMContextProxy):
     dish = get_cur_dish(data)
     await bot.send_photo(
         chat_id=data['chat_id'],
