@@ -6,10 +6,10 @@ from db import DishModel, UserModel
 from .setup import bot, db_manager
 from .markup import start_kb, choose_kb
 
-from food_api_handler.controller import DishApiRepr
+from food_api_handler.food_searcher import DishApiRepr
 
 
-def get_cur_dish(data: FSMContextProxy):
+def get_cur_dish(data: FSMContextProxy) -> DishApiRepr:
     return data['dishes'][data['cur_dish_id']]
 
 
@@ -35,9 +35,15 @@ def save_dish_event(dish_model: DishModel, user_model: UserModel):
     )
 
 
-def from_dish_api_repr(dish: DishApiRepr):
+def from_dish_api_repr(dish: DishApiRepr) -> DishModel:
     dish_model = DishModel(**asdict(dish))
     return dish_model
+
+
+# def from_db_model_repr(dish: DishModel) -> DishApiRepr:
+#     print(dish._asdict())
+#     dish_api = DishApiRepr(**dish._asdict())
+#     return dish_api
 
 
 async def to_start(callback: types.CallbackQuery):
@@ -70,3 +76,10 @@ async def show_cur_dish_info(data: FSMContextProxy):
         photo=dish.image_url,
         caption=dish.title,
     )
+
+
+def format_dishes_for_message(dishes: list[DishModel]) -> str:
+    ans = ''
+    for i, dish in enumerate(dishes):
+        ans += f'{i} ) {dish.title}\n'
+    return ans

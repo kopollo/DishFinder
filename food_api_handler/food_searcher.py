@@ -58,5 +58,5 @@ class DishBotController:
                 # print(dish)
                 self.answer.append(dish)
 
-    def get_dishes(self):
+    def get_dishes(self) -> list[DishApiRepr]:
         return self.answer

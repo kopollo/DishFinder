@@ -37,16 +37,13 @@ class DBManager:
         db_sess.merge(association)
         db_sess.commit()
 
-    def get_all_user_dishes(self, user: UserModel):
+    def get_all_user_dishes(self, user: UserModel) -> list[DishModel]:
         db_sess = db_session.create_session()
         dishes = db_sess.query(UsersToDishesModel).filter(
             UsersToDishesModel.user_id == user.tg_id
         ).all()
-        # api_repr_dishes = list()/
-        for row in dishes:
-            row: UsersToDishesModel
-            print(row.dish.title)
-        # if db_sess.query(User).filter(User.email == form.email.data).first():
-        # for dish in dishes:
-        #     # dish: UsersToDishesModel
-        #     print(dish.title)
+        dishes = [record.dish for record in dishes]
+        # for row in a:
+        #     row: DishModel
+        #     print(row.title)
+        return dishes
