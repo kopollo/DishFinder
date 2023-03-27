@@ -1,15 +1,14 @@
-from food_api import SearchByIngredientsRequest, GetRecipeInstructionsRequest
+from .requests_wrapper import SearchByIngredientsRequest, \
+    GetRecipeInstructionsRequest
+from dataclasses import dataclass
 
 
-class Dish:
-    def __init__(self, title, dish_id, image_url, instruction):
-        self.title = title
-        self.dish_id = dish_id
-        self.image_url = image_url
-        self.instruction = instruction
-
-    def __str__(self):
-        return f'<Dish> {self.title} {self.image_url}'
+@dataclass()
+class DishApiRepr:
+    title: str
+    id: int
+    image_url: str
+    instruction: str
 
 
 class DishBotController:
@@ -24,7 +23,6 @@ class DishBotController:
         self.dishes = \
             SearchByIngredientsRequest(self.ingredients).get_all_dishes()
         self.generate_dish_list_for_answer()
-        # CHANGE d INTO USER INPUT
 
     def _info(self):
         for dish in self.dishes:
@@ -51,14 +49,14 @@ class DishBotController:
             title, dish_id, image_url = dish
             instruction = self.generate_instruction(dish_id)
             if instruction is not None:
-                dish = Dish(
+                dish = DishApiRepr(
                     title=title,
-                    dish_id=dish_id,
+                    id=dish_id,
                     image_url=image_url,
                     instruction=instruction
                 )
-                print(dish)
+                # print(dish)
                 self.answer.append(dish)
 
-    def get_dishes(self):
+    def get_dishes(self) -> list[DishApiRepr]:
         return self.answer

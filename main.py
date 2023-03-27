@@ -1,3 +1,6 @@
-import telegram_api
+from db import db_session
+from bot_handler import dp_handlers
 if __name__ == "__main__":
-    telegram_api.run()
+    db_session.global_init('db/dish_finder.db')
+    dp_handlers.run()
+

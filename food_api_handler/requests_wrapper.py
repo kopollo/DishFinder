@@ -48,7 +48,7 @@ class SearchByIngredientsRequest:
 
         return dishes
 
-    def get_dish_ingredients(self):
+    def get_dish_ingredients(self):  # or other dop info
         # besides instructions, we are also need a list of ingred
         pass
 
