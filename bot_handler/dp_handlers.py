@@ -16,30 +16,41 @@ async def find_dish_event(message: types.Message):
 
 @dp.message_handler(Text(equals='History'))
 async def check_history_event(message: types.Message, state: FSMContext):
-    await message.delete()
+    history_kb = InlineKeyboardMarkup()
+    back_btn = InlineKeyboardButton(
+        text='back',
+        callback_data='back'
+    )
+    history_kb.add(back_btn)
+    # need to be generated every time -> relocate to new def()
+    await FindDishState.history.set()
     async with state.proxy() as data:
         dishes = db_manager.get_all_user_dishes(get_cur_user(data))
         ans = format_dishes_for_message(dishes)
         await bot.send_message(
             chat_id=message.from_user.id,
             text=ans,
+            reply_markup=history_kb,
         )
 
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message, state: FSMContext):
+    # SPLIT INTO start with storage init+start_state_set() and
+    # start that sends message, then refactor to_start()
     await bot.send_message(
         chat_id=message.from_user.id,
         text='HI HI HI HI',
         reply_markup=start_kb,
     )
-    user = UserModel(tg_id=message.from_user.id)  # WIERD NEED TO SEPARATE
+    user = UserModel(tg_id=message.from_user.id)  # make init_user_in_db()
     db_manager.add_user(user)
-    # create a separate function proxy_init()
-    async with state.proxy() as data:
-        data['chat_id'] = message.from_user.id
-        data['cur_dish_id'] = 0
-        data['user'] = user
+    to_store = {
+        'chat_id': message.from_user.id,
+        'cur_dish_id': 0,
+        'user': user,
+    }
+    await init_fsm_proxy(state, to_store)
 
 
 test_input = 'apples,flour,sugar'
@@ -77,8 +88,15 @@ async def show_more_dish_info(callback: types.CallbackQuery, state: FSMContext):
         await callback.answer('SAVED!')
 
 
+@dp.callback_query_handler(state=FindDishState.history)
+async def history_callback(callback: types.CallbackQuery, state: FSMContext):
+    if callback.data == 'back':
+        await to_start(callback)
+        await state.reset_state(with_data=False)
+
+
 @dp.callback_query_handler(state=FindDishState.enter_ingredients)
-async def show_dishes_menu(callback: types.CallbackQuery, state: FSMContext):
+async def dish_list_callback(callback: types.CallbackQuery, state: FSMContext):
     # don't like - need refactor
     if callback.data == 'prev':
         async with state.proxy() as data:

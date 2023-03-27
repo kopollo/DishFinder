@@ -1,4 +1,6 @@
-from aiogram.dispatcher.storage import FSMContextProxy
+import copy
+
+from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 import aiogram
 from aiogram import types
 from dataclasses import dataclass, asdict
@@ -40,12 +42,6 @@ def from_dish_api_repr(dish: DishApiRepr) -> DishModel:
     return dish_model
 
 
-# def from_db_model_repr(dish: DishModel) -> DishApiRepr:
-#     print(dish._asdict())
-#     dish_api = DishApiRepr(**dish._asdict())
-#     return dish_api
-
-
 async def to_start(callback: types.CallbackQuery):
     await callback.message.answer(text='BACK TO MAIN',
                                   reply_markup=start_kb)
@@ -83,3 +79,9 @@ def format_dishes_for_message(dishes: list[DishModel]) -> str:
     for i, dish in enumerate(dishes):
         ans += f'{i} ) {dish.title}\n'
     return ans
+
+
+async def init_fsm_proxy(state: FSMContext, to_store: dict):
+    async with state.proxy() as data:
+        for key, value in to_store.items():
+            data[key] = value

@@ -23,7 +23,7 @@ class SearchByIngredientsRequest:
 
     def __init__(self, ingredients):
         self.ingredients = ingredients
-        self.dish_number = 5
+        self.dish_number = 10
         self.row_json = self._get_row_json()
 
     def _get_row_json(self):
@@ -48,7 +48,7 @@ class SearchByIngredientsRequest:
 
         return dishes
 
-    def get_dish_ingredients(self):
+    def get_dish_ingredients(self):  # or other dop info
         # besides instructions, we are also need a list of ingred
         pass
 
