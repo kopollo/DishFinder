@@ -1,4 +1,3 @@
-from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 
@@ -34,8 +33,8 @@ async def check_history_event(message: types.Message, state: FSMContext):
         )
 
 
-@dp.message_handler(commands=['start'])
-async def start(message: types.Message, state: FSMContext):
+@dp.message_handler(commands=['start'], state='*')
+async def init_dialog(message: types.Message, state: FSMContext):
     # SPLIT INTO start with storage init+start_state_set() and
     # start that sends message, then refactor to_start()
     await bot.send_message(
@@ -43,7 +42,7 @@ async def start(message: types.Message, state: FSMContext):
         text='HI HI HI HI',
         reply_markup=start_kb,
     )
-    user = UserModel(tg_id=message.from_user.id)  # make init_user_in_db()
+    user = UserModel(tg_id=message.from_user.id)
     db_manager.add_user(user)
     to_store = {
         'chat_id': message.from_user.id,
@@ -53,25 +52,27 @@ async def start(message: types.Message, state: FSMContext):
     await init_fsm_proxy(state, to_store)
 
 
-test_input = 'apples,flour,sugar'
+test_input = 'apples,butter'
 
 
 @dp.message_handler(state=FindDishState.enter_ingredients)
-async def find_dishes(message: types.Message, state: FSMContext):
+async def enter_ingredients(message: types.Message, state: FSMContext):
     ingredients = message.text
-    food_searcher.run(test_input)
+    food_searcher.run(test_input)  # TODO
     dishes = food_searcher.get_dishes()
-    await message.answer(ingredients)
+    # await message.answer(ingredients)
     try:
         async with state.proxy() as data:
             data['dishes'] = dishes
+            await FindDishState.show_dishes.set()
             await show_cur_dish_info(data)
     except IndexError:  # dont work. need async version???
-        print('no dishes')
+        print('no dishes find')
+        # await to_start()
 
 
 @dp.callback_query_handler(state=FindDishState.more_info)
-async def show_more_dish_info(callback: types.CallbackQuery, state: FSMContext):
+async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         dish: DishApiRepr = get_cur_dish(data)
         user: UserModel = get_cur_user(data)
@@ -80,7 +81,7 @@ async def show_more_dish_info(callback: types.CallbackQuery, state: FSMContext):
         await callback.message.delete()
         async with state.proxy() as data:
             await show_cur_dish_info(data)
-        await FindDishState.enter_ingredients.set()
+        await FindDishState.show_dishes.set()
         await callback.answer('back')
 
     elif callback.data == 'save':
@@ -95,37 +96,33 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
         await state.reset_state(with_data=False)
 
 
-@dp.callback_query_handler(state=FindDishState.enter_ingredients)
+@dp.callback_query_handler(state=FindDishState.show_dishes)
 async def dish_list_callback(callback: types.CallbackQuery, state: FSMContext):
     # don't like - need refactor
-    if callback.data == 'prev':
-        async with state.proxy() as data:
+    navigation_btns = ['prev', 'next']
+    async with state.proxy() as data:
+        dish = get_cur_dish(data)
+        if callback.data == 'prev':
             prev_dish(data)
-            dish = get_cur_dish(data)
-            await update_dish_message(callback, dish)
-            await callback.answer('prev')
-
-    elif callback.data == 'next':
-        async with state.proxy() as data:
+        elif callback.data == 'next':
             next_dish(data)
-            dish = get_cur_dish(data)
-            await update_dish_message(callback, dish)
-            await callback.answer('next')
 
-    elif callback.data == 'more':
-        await callback.message.delete()
-        async with state.proxy() as data:
-            dish = get_cur_dish(data)
+        elif callback.data == 'more':
+            await callback.message.delete()  # CAN BE SPLIT
             await callback.message.answer(
                 text=dish.instruction,
                 reply_markup=more_kb,
             )
-        await FindDishState.more_info.set()
-        await callback.answer()
+            await FindDishState.more_info.set()
+            await callback.answer()
 
-    elif callback.data == 'stop':
-        await to_start(callback)
-        await state.reset_state(with_data=False)
+        elif callback.data == 'stop':
+            await to_start(callback)
+            await state.reset_state(with_data=False)
+
+        if callback.data in navigation_btns:
+            await update_dish_message(callback, dish)
+            await callback.answer()
 
 
 async def on_startup(_):

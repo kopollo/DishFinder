@@ -5,6 +5,7 @@ from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, \
 
 class FindDishState(StatesGroup):
     enter_ingredients = State()
+    show_dishes = State()
     more_info = State()
     history = State()
 
@@ -52,6 +53,10 @@ class MoreInfoKeyboard:
         callback_data='save',
     )
     more_kb.add(back_btn, save_btn)
+
+
+class HistoryKeyboard:
+    pass
 
 
 start_kb = StartKeyboard.start_kb

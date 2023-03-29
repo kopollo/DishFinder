@@ -23,7 +23,7 @@ class SearchByIngredientsRequest:
 
     def __init__(self, ingredients):
         self.ingredients = ingredients
-        self.dish_number = 10
+        self.dish_number = 3
         self.row_json = self._get_row_json()
 
     def _get_row_json(self):
