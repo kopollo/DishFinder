@@ -30,7 +30,7 @@ class SearchByIngredientsRequest:
         params = {
             'ingredients': self.ingredients,
             'apiKey': FOOD_API_TOKEN,
-            'number': self.dish_number  # CHECK THAT WE HAVE EXACTLY NUMBER
+            'number': self.dish_number
         }
         response = get_request(
             server=self.API_URL,
@@ -40,12 +40,11 @@ class SearchByIngredientsRequest:
 
     def get_all_dishes(self):
         dishes = []
-        for i in range(self.dish_number):
+        for i in range(len(self.row_json)):
             title = self.row_json[i]['title']
             dish_id = self.row_json[i]['id']
             image_url = self.row_json[i]['image']
             dishes.append((title, dish_id, image_url))
-
         return dishes
 
     def get_dish_ingredients(self):  # or other dop info

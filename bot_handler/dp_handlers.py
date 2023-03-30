@@ -49,7 +49,7 @@ async def init_dialog(message: types.Message, state: FSMContext):
     await init_fsm_proxy(state, to_store)
 
 
-test_input = 'apple, nuts'
+test_input = 'apple,nuts'
 
 
 @dp.message_handler(state=FindDishState.enter_ingredients)
@@ -64,16 +64,13 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
             await FindDishState.show_dishes.set()
             await send_cur_dish_info(data)
     except IndexError:  # dont work. need async version???
-        print('no dishes find')
-        # await to_start()
+        # TODO send_sorry_msg
+        # and refactor to_start
+        await state.reset_state(with_data=False)
 
 
 @dp.callback_query_handler(state=FindDishState.more_info)
 async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
-    async with state.proxy() as data:
-        dish: DishApiRepr = get_cur_dish(data)
-        user: UserModel = get_cur_user(data)
-
     if callback.data == 'back':
         await callback.message.delete()
         async with state.proxy() as data:
@@ -82,8 +79,11 @@ async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
             await callback.answer('back')
 
     elif callback.data == 'save':
-        save_dish_event(from_dish_api_repr(dish), user)
-        await callback.answer('SAVED!')
+        async with state.proxy() as data:
+            dish: DishApiRepr = get_cur_dish(data)
+            user: UserModel = get_cur_user(data)
+            save_dish_event(from_dish_api_repr(dish), user)
+            await callback.answer('SAVED!')
 
 
 @dp.callback_query_handler(state=FindDishState.history)
