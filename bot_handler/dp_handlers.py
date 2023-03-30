@@ -14,15 +14,25 @@ async def find_dish_event(message: types.Message):
     await message.delete()
 
 
-@dp.message_handler(Text(equals='History'))
-async def check_history_event(message: types.Message, state: FSMContext):
-    history_kb = InlineKeyboardMarkup()
+def make_kb(dishes: list[DishModel]):
+    history_kb = InlineKeyboardMarkup(row_width=5)
     back_btn = InlineKeyboardButton(
         text='back',
         callback_data='back'
     )
+    for i in range(len(dishes)):
+        dish_btn = InlineKeyboardButton(
+            text=str(i),
+            callback_data=str(f'dish_{dishes[i].id}')
+        )
+
+        history_kb.insert(dish_btn)
     history_kb.add(back_btn)
-    # need to be generated every time -> relocate to new def()
+    return history_kb
+
+
+@dp.message_handler(Text(equals='History'))
+async def check_history_event(message: types.Message, state: FSMContext):
     await FindDishState.history.set()
     async with state.proxy() as data:
         dishes = db_manager.get_all_user_dishes(get_cur_user(data))
@@ -30,7 +40,7 @@ async def check_history_event(message: types.Message, state: FSMContext):
         await bot.send_message(
             chat_id=message.from_user.id,
             text=ans,
-            reply_markup=history_kb,
+            reply_markup=make_kb(dishes),
         )
 
 
@@ -38,7 +48,7 @@ async def check_history_event(message: types.Message, state: FSMContext):
 async def init_dialog(message: types.Message, state: FSMContext):
     # SPLIT INTO start with storage init+start_state_set() and
     # start that sends message, then refactor to_start()
-    await send_welcome_msg(char_id=message.from_user.id)
+    await send_welcome_msg(chat_id=message.from_user.id)
     user = UserModel(tg_id=message.from_user.id)
     db_manager.add_user(user)
     to_store = {
@@ -88,14 +98,20 @@ async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(state=FindDishState.history)
 async def history_callback(callback: types.CallbackQuery, state: FSMContext):
+    more_info_prefix = 'dish_'
     if callback.data == 'back':
         await to_start(callback)
         await state.reset_state(with_data=False)
+    elif callback.data.startswith(more_info_prefix):
+        dish_id = callback.data.removeprefix(more_info_prefix)
+        dish = db_manager.get_dish(dish_id)
+        await send_dish_info(callback, dish)  # i can pass keyboard in params
+
+        await callback.answer()
 
 
 @dp.callback_query_handler(state=FindDishState.show_dishes)
 async def dish_list_callback(callback: types.CallbackQuery, state: FSMContext):
-    # don't like - need refactor
     navigation_btns = ['prev', 'next']
     async with state.proxy() as data:
         if callback.data == 'prev':
