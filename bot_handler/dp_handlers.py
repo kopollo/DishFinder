@@ -4,6 +4,7 @@ from aiogram.utils import executor
 from .setup import *
 from .markup import *
 from .utils import *
+from .messages import *
 
 
 @dp.message_handler(Text(equals='Find dish'))
@@ -37,11 +38,7 @@ async def check_history_event(message: types.Message, state: FSMContext):
 async def init_dialog(message: types.Message, state: FSMContext):
     # SPLIT INTO start with storage init+start_state_set() and
     # start that sends message, then refactor to_start()
-    await bot.send_message(
-        chat_id=message.from_user.id,
-        text='HI HI HI HI',
-        reply_markup=start_kb,
-    )
+    await send_welcome_msg(char_id=message.from_user.id)
     user = UserModel(tg_id=message.from_user.id)
     db_manager.add_user(user)
     to_store = {
@@ -52,7 +49,7 @@ async def init_dialog(message: types.Message, state: FSMContext):
     await init_fsm_proxy(state, to_store)
 
 
-test_input = 'apples,butter'
+test_input = 'apple, nuts'
 
 
 @dp.message_handler(state=FindDishState.enter_ingredients)
@@ -65,7 +62,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             data['dishes'] = dishes
             await FindDishState.show_dishes.set()
-            await show_cur_dish_info(data)
+            await send_cur_dish_info(data)
     except IndexError:  # dont work. need async version???
         print('no dishes find')
         # await to_start()
@@ -80,9 +77,9 @@ async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
     if callback.data == 'back':
         await callback.message.delete()
         async with state.proxy() as data:
-            await show_cur_dish_info(data)
-        await FindDishState.show_dishes.set()
-        await callback.answer('back')
+            await send_cur_dish_info(data)
+            await FindDishState.show_dishes.set()
+            await callback.answer('back')
 
     elif callback.data == 'save':
         save_dish_event(from_dish_api_repr(dish), user)
@@ -101,18 +98,13 @@ async def dish_list_callback(callback: types.CallbackQuery, state: FSMContext):
     # don't like - need refactor
     navigation_btns = ['prev', 'next']
     async with state.proxy() as data:
-        dish = get_cur_dish(data)
         if callback.data == 'prev':
             prev_dish(data)
         elif callback.data == 'next':
             next_dish(data)
-
         elif callback.data == 'more':
             await callback.message.delete()  # CAN BE SPLIT
-            await callback.message.answer(
-                text=dish.instruction,
-                reply_markup=more_kb,
-            )
+            await send_more_dish_info(callback, dish=get_cur_dish(data))
             await FindDishState.more_info.set()
             await callback.answer()
 
@@ -121,7 +113,7 @@ async def dish_list_callback(callback: types.CallbackQuery, state: FSMContext):
             await state.reset_state(with_data=False)
 
         if callback.data in navigation_btns:
-            await update_dish_message(callback, dish)
+            await update_dish_message(callback, dish=get_cur_dish(data))
             await callback.answer()
 
 
