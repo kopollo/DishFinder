@@ -15,7 +15,7 @@ def get_cur_dish(data: FSMContextProxy) -> DishApiRepr:
     return data['dishes'][data['cur_dish_id']]
 
 
-def get_cur_user(data: FSMContextProxy):
+def get_cur_user(data: FSMContextProxy) -> UserModel:
     return data['user']
 
 

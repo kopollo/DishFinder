@@ -1,4 +1,4 @@
-import aiogram
+from aiogram.utils.exceptions import MessageNotModified
 from aiogram import types
 from aiogram.dispatcher.storage import FSMContextProxy
 
@@ -26,7 +26,7 @@ async def update_dish_message(callback: types.CallbackQuery, dish):
             media=photo,
             reply_markup=choose_kb,
         )
-    except aiogram.utils.exceptions.MessageNotModified:
+    except MessageNotModified:
         print('same as before')
         pass
 
