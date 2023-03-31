@@ -15,7 +15,7 @@ def get_cur_dish(data: FSMContextProxy) -> DishApiRepr:
     return data['dishes'][data['cur_dish_id']]
 
 
-def get_cur_user(data: FSMContextProxy):
+def get_cur_user(data: FSMContextProxy) -> UserModel:
     return data['user']
 
 
@@ -47,31 +47,6 @@ async def to_start(callback: types.CallbackQuery):
                                   reply_markup=start_kb)
     await callback.message.delete()
     await callback.answer()
-
-
-async def update_dish_message(callback: types.CallbackQuery, dish):
-    photo = types.InputMediaPhoto(media=dish.image_url,
-                                  caption=dish.title)
-    try:
-        await bot.edit_message_media(
-            chat_id=callback.from_user.id,
-            message_id=callback.message.message_id,
-            media=photo,
-            reply_markup=choose_kb,
-        )
-    except aiogram.utils.exceptions.MessageNotModified:
-        print('same as before')
-        pass
-
-
-async def show_cur_dish_info(data: FSMContextProxy):
-    dish = get_cur_dish(data)
-    await bot.send_photo(
-        chat_id=data['chat_id'],
-        reply_markup=choose_kb,
-        photo=dish.image_url,
-        caption=dish.title,
-    )
 
 
 def format_dishes_for_message(dishes: list[DishModel]) -> str:

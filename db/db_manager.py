@@ -11,9 +11,10 @@ class DBManager:
         db_sess.merge(dish)
         db_sess.commit()
 
-    # def get_dish(self, dish_id: int):
-    # db_sess = db_session.create_session()
-    # db_sess.query(User).filter(User.email == form.email.data).first():
+    def get_dish(self, dish_id: int) -> DishModel:
+        db_sess = db_session.create_session()
+        dish = db_sess.query(DishModel).filter(DishModel.id == dish_id).first()
+        return dish
 
     def add_user(self, user: UserModel):
         db_sess = db_session.create_session()

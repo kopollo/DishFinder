@@ -2,9 +2,12 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, \
     KeyboardButton, InlineKeyboardButton
 
+from db import DishModel
+
 
 class FindDishState(StatesGroup):
     enter_ingredients = State()
+    show_dishes = State()
     more_info = State()
     history = State()
 
@@ -54,6 +57,36 @@ class MoreInfoKeyboard:
     more_kb.add(back_btn, save_btn)
 
 
+class HistoryKeyboard:
+
+    @staticmethod
+    def generate_kb(dishes: list[DishModel]):
+        history_kb = InlineKeyboardMarkup(row_width=5)
+        back_btn = InlineKeyboardButton(
+            text='back',
+            callback_data='back'
+        )
+        for i in range(len(dishes)):
+            dish_btn = InlineKeyboardButton(
+                text=str(i),
+                callback_data=str(f'dish_{dishes[i].id}')
+            )
+            history_kb.insert(dish_btn)
+
+        history_kb.add(back_btn)
+        return history_kb
+
+
+class HideDishKeyboard:
+    hide_kb = InlineKeyboardMarkup()
+    hide_btn = InlineKeyboardButton(
+        text='hide',
+        callback_data='hide'
+    )
+    hide_kb.add(hide_btn)
+
+
 start_kb = StartKeyboard.start_kb
 choose_kb = ChooseDishKeyboard.choose_kb
 more_kb = MoreInfoKeyboard.more_kb
+hide_dish_kb = HideDishKeyboard.hide_kb
