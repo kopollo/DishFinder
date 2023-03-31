@@ -59,6 +59,16 @@ class HistoryKeyboard:
     pass
 
 
+class HideDishKeyboard:
+    hide_kb = InlineKeyboardMarkup()
+    hide_btn = InlineKeyboardButton(
+        text='hide',
+        callback_data='hide'
+    )
+    hide_kb.add(hide_btn)
+
+
 start_kb = StartKeyboard.start_kb
 choose_kb = ChooseDishKeyboard.choose_kb
 more_kb = MoreInfoKeyboard.more_kb
+hide_dish_kb = HideDishKeyboard.hide_kb

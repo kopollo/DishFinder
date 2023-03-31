@@ -102,11 +102,14 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
     if callback.data == 'back':
         await to_start(callback)
         await state.reset_state(with_data=False)
+
     elif callback.data.startswith(more_info_prefix):
         dish_id = callback.data.removeprefix(more_info_prefix)
         dish = db_manager.get_dish(dish_id)
-        await send_dish_info(callback, dish)  # i can pass keyboard in params
-
+        await send_dish_info(callback, dish)
+        await callback.answer()
+    elif callback.data == 'hide':
+        await callback.message.delete()  # CAN BE SPLIT
         await callback.answer()
 
 

@@ -52,5 +52,5 @@ async def send_dish_info(callback: types.CallbackQuery, dish: DishModel):
     await callback.message.answer_photo(
         photo=dish.image_url,
         caption=dish.title,
-        reply_markup=start_kb,
+        reply_markup=hide_dish_kb,
     )
