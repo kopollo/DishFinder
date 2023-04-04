@@ -16,9 +16,9 @@ class StartKeyboard:
     start_kb = ReplyKeyboardMarkup(resize_keyboard=True,
                                    one_time_keyboard=True)
     find_dish_btn = KeyboardButton(
-        text='Find dish',
+        text='/find_dish',
     )
-    history_btn = KeyboardButton('History')
+    history_btn = KeyboardButton('/history')
     start_kb.add(find_dish_btn, history_btn)
 
 
@@ -39,7 +39,6 @@ class ChooseDishKeyboard:
     more_btn = InlineKeyboardButton(
         text='more',
         callback_data='more',
-
     )
     choose_kb.add(back_btn, more_btn, next_btn, stop_btn)
 

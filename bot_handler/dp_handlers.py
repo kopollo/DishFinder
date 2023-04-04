@@ -1,24 +1,21 @@
-from aiogram.dispatcher.filters import Text
 from aiogram.utils import executor
 
-from .setup import *
-from .markup import *
 from .utils import *
 from .messages import *
 
 
-@dp.message_handler(Text(equals='Find dish'))
-async def find_dish_event(message: types.Message):
+@dp.message_handler(commands=['find_dish'], state='*')
+async def find_dish_cmd(message: types.Message):
     await message.answer("Enter your ingredients split by ',' ")
     await FindDishState.enter_ingredients.set()
     await message.delete()
 
 
-@dp.message_handler(Text(equals='History'))
+@dp.message_handler(commands=['history'], state='*')
 async def check_history_cmd(message: types.Message, state: FSMContext):
     await FindDishState.history.set()
     async with state.proxy() as data:
-        dishes = db_manager.get_all_user_dishes(get_cur_user(data))
+        dishes = db_manager.get_all_user_dishes(message.from_user.id)
         ans = format_dishes_for_message(dishes)
         await bot.send_message(
             chat_id=message.from_user.id,
@@ -29,8 +26,7 @@ async def check_history_cmd(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=['start'], state='*')
 async def init_dialog_cmd(message: types.Message, state: FSMContext):
-    # SPLIT INTO start with storage init+start_state_set() and
-    # start that sends message, then refactor to_start()
+    await state.reset_state(with_data=False)
     await send_welcome_msg(chat_id=message.from_user.id)
     user = UserModel(tg_id=message.from_user.id)
     db_manager.add_user(user)
@@ -42,7 +38,7 @@ async def init_dialog_cmd(message: types.Message, state: FSMContext):
     await init_fsm_proxy(state, to_store)
 
 
-test_input = 'apple,nuts'
+test_input = 'apple'
 
 
 @dp.message_handler(state=FindDishState.enter_ingredients)
@@ -50,15 +46,13 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     ingredients = message.text
     food_searcher.run(test_input)  # TODO
     dishes = food_searcher.get_dishes()
-    # await message.answer(ingredients)
     try:
         async with state.proxy() as data:
             data['dishes'] = dishes
             await FindDishState.show_dishes.set()
             await send_cur_dish_info(data)
     except IndexError:
-        # TODO send_sorry_msg
-        # and refactor to_start
+        await send_sorry_msg(message.from_user.id)
         await state.reset_state(with_data=False)
 
 
@@ -90,11 +84,11 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
         dish_id = callback.data.removeprefix(more_info_prefix)
         dish = db_manager.get_dish(dish_id)
         await send_dish_info(callback, dish)
-        await callback.answer()
 
     elif callback.data == 'hide':
         await callback.message.delete()
-        await callback.answer()
+
+    await callback.answer()
 
 
 @dp.callback_query_handler(state=FindDishState.show_dishes)

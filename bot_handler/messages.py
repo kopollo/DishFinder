@@ -2,9 +2,9 @@ from aiogram.utils.exceptions import MessageNotModified
 from aiogram import types
 from aiogram.dispatcher.storage import FSMContextProxy
 
-from bot_handler.markup import *
-from bot_handler.setup import *
-from bot_handler.utils import get_cur_dish
+from .markup import *
+from .setup import *
+from .utils import get_cur_dish
 from db import DishModel
 
 
@@ -12,6 +12,14 @@ async def send_welcome_msg(chat_id):
     await bot.send_message(
         chat_id=chat_id,
         text='HI HI HI HI',
+        reply_markup=start_kb,
+    )
+
+
+async def send_sorry_msg(chat_id):
+    await bot.send_message(
+        chat_id=chat_id,
+        text="I'm sorry but I haven't find anything",
         reply_markup=start_kb,
     )
 

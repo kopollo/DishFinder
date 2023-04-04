@@ -1,12 +1,10 @@
-import copy
-
 from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
-import aiogram
 from aiogram import types
-from dataclasses import dataclass, asdict
+from dataclasses import asdict
+
 from db import DishModel, UserModel
 from .setup import bot, db_manager
-from .markup import start_kb, choose_kb
+from .markup import *
 
 from food_api_handler.food_searcher import DishApiRepr
 

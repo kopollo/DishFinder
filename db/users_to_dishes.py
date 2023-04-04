@@ -3,7 +3,6 @@ from sqlalchemy import orm
 
 from .db_session import SqlAlchemyBase
 from db.dishes import DishModel
-from db.users import UserModel
 
 
 class UsersToDishesModel(SqlAlchemyBase):
@@ -21,4 +20,3 @@ class UsersToDishesModel(SqlAlchemyBase):
         primary_key=True,
     )
     dish = orm.relationship(DishModel)
-    # dish = orm.relationship(DishModel, backref='dish')
