@@ -1,5 +1,7 @@
+import aiogram
 from aiogram.utils import executor
 
+from .middleware import CheckUserMiddleware
 from .utils import *
 from .messages import *
 
@@ -14,31 +16,31 @@ async def find_dish_cmd(message: types.Message):
 @dp.message_handler(commands=['history'], state='*')
 async def check_history_cmd(message: types.Message, state: FSMContext):
     await FindDishState.history.set()
-    async with state.proxy() as data:
-        dishes = db_manager.get_all_user_dishes(message.from_user.id)
-        ans = format_dishes_for_message(dishes)
+    dishes = filter_dishes(
+        db_manager.get_all_user_dishes(message.from_user.id)
+    )
+    ans = format_dishes_for_message(dishes)
+    try:
         await bot.send_message(
             chat_id=message.from_user.id,
             text=ans,
             reply_markup=HistoryKeyboard.generate_kb(dishes),
         )
+    except aiogram.utils.exceptions.MessageTextIsEmpty:
+        await send_sorry_msg(message.from_user.id)
+        await state.reset_state(with_data=False)
 
 
 @dp.message_handler(commands=['start'], state='*')
 async def init_dialog_cmd(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
     await send_welcome_msg(chat_id=message.from_user.id)
+
     user = UserModel(tg_id=message.from_user.id)
     db_manager.add_user(user)
-    to_store = {
-        'chat_id': message.from_user.id,
-        'cur_dish_id': 0,
-        'user': user,
-    }
-    await init_fsm_proxy(state, to_store)
 
 
-test_input = 'apple'
+test_input = 'nut'
 
 
 @dp.message_handler(state=FindDishState.enter_ingredients)
@@ -119,4 +121,5 @@ async def on_startup(_):
 
 
 def run():
+    dp.middleware.setup(CheckUserMiddleware())
     executor.start_polling(dp, on_startup=on_startup)

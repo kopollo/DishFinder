@@ -1,3 +1,5 @@
+from sqlalchemy import desc, asc
+
 from . import db_session
 from .dishes import DishModel
 from .users import UserModel
@@ -21,6 +23,12 @@ class DBManager:
         db_sess.merge(user)
         db_sess.commit()
 
+    def get_user(self, user_id: int) -> UserModel:
+        db_sess = db_session.create_session()
+        user = db_sess.query(UserModel).filter(
+            UserModel.tg_id == user_id).first()
+        return user
+
     def is_user_exist(self, user_id: int) -> bool:
         db_sess = db_session.create_session()
         exists = db_sess.query(UserModel).filter(
@@ -40,8 +48,11 @@ class DBManager:
 
     def get_all_user_dishes(self, user_id: int) -> list[DishModel]:
         db_sess = db_session.create_session()
-        dishes = db_sess.query(UsersToDishesModel).filter(
-            UsersToDishesModel.user_id == user_id
-        ).all()
+        dishes = (
+            db_sess.query(UsersToDishesModel)
+            .join(DishModel)
+            .filter(UsersToDishesModel.user_id == user_id)
+            .order_by(desc(UsersToDishesModel.id))
+        )
         dishes = [record.dish for record in dishes]
         return dishes

@@ -41,10 +41,15 @@ def from_dish_api_repr(dish: DishApiRepr) -> DishModel:
 
 
 async def to_start(callback: types.CallbackQuery):
-    await callback.message.answer(text='BACK TO MAIN',
+    text = """welcome back"""
+    await callback.message.answer(text=text,
                                   reply_markup=start_kb)
     await callback.message.delete()
     await callback.answer()
+
+
+def filter_dishes(dishes: list[DishModel]):
+    return dishes[:10]
 
 
 def format_dishes_for_message(dishes: list[DishModel]) -> str:
