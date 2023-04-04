@@ -1,12 +1,10 @@
-import copy
-
 from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
-import aiogram
 from aiogram import types
-from dataclasses import dataclass, asdict
+from dataclasses import asdict
+
 from db import DishModel, UserModel
 from .setup import bot, db_manager
-from .markup import start_kb, choose_kb
+from .markup import *
 
 from food_api_handler.food_searcher import DishApiRepr
 
@@ -43,10 +41,15 @@ def from_dish_api_repr(dish: DishApiRepr) -> DishModel:
 
 
 async def to_start(callback: types.CallbackQuery):
-    await callback.message.answer(text='BACK TO MAIN',
+    text = """welcome back"""
+    await callback.message.answer(text=text,
                                   reply_markup=start_kb)
     await callback.message.delete()
     await callback.answer()
+
+
+def filter_dishes(dishes: list[DishModel]):
+    return dishes[:10]
 
 
 def format_dishes_for_message(dishes: list[DishModel]) -> str:
