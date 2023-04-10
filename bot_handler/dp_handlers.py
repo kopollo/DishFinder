@@ -1,7 +1,9 @@
 import aiogram
 from aiogram.utils import executor
 
+from .markup import FindDishState, HistoryKeyboard
 from .middleware import CheckUserMiddleware
+from .setup import *
 from .utils import *
 from .messages import *
 
@@ -37,13 +39,16 @@ async def init_dialog_cmd(message: types.Message, state: FSMContext):
     await send_welcome_msg(chat_id=message.from_user.id)
 
 
-test_input = 'nut'
-
-
 @dp.message_handler(state=FindDishState.enter_ingredients)
 async def enter_ingredients(message: types.Message, state: FSMContext):
+    """
+    Handle user input ingredients and call food api to get list of dishes.
+    :param message:
+    :param state:
+    :return:
+    """
     ingredients = message.text
-    food_searcher.run(test_input)  # TODO
+    food_searcher.run(ingredients)
     dishes = food_searcher.get_dishes()
     try:
         async with state.proxy() as data:
@@ -57,6 +62,12 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(state=FindDishState.more_info)
 async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
+    """
+    Handle
+    :param callback:
+    :param state:
+    :return:
+    """
     if callback.data == 'back':
         await callback.message.delete()
         async with state.proxy() as data:
@@ -69,7 +80,7 @@ async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
             dish = get_cur_dish(data)
             user = get_cur_user(data)
             # print(user.tg_id)
-            save_dish_event(from_dish_api_repr(dish), user)
+            db_manager.save_dish_event(from_dish_api_repr(dish), user)
             await callback.answer('SAVED!')
 
 

@@ -2,8 +2,8 @@ from aiogram.utils.exceptions import MessageNotModified
 from aiogram import types
 from aiogram.dispatcher.storage import FSMContextProxy
 
-from .markup import *
-from .setup import *
+from .markup import start_kb, choose_kb, more_kb, hide_dish_kb
+from .setup import bot
 from .utils import get_cur_dish
 from db import DishModel
 

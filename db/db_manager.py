@@ -1,4 +1,4 @@
-from sqlalchemy import desc, asc
+from sqlalchemy import desc
 
 from . import db_session
 from .dishes import DishModel
@@ -56,3 +56,11 @@ class DBManager:
         )
         dishes = [record.dish for record in dishes]
         return dishes
+
+    def save_dish_event(self, dish_model: DishModel, user_model: UserModel):
+        self.add_dish(dish_model)
+        self.add_user_to_dish_association(
+            dish_id=dish_model.id,
+            user_id=user_model.tg_id,
+        )
+
