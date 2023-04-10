@@ -36,9 +36,6 @@ async def init_dialog_cmd(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
     await send_welcome_msg(chat_id=message.from_user.id)
 
-    user = UserModel(tg_id=message.from_user.id)
-    db_manager.add_user(user)
-
 
 test_input = 'nut'
 
@@ -71,6 +68,7 @@ async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
         async with state.proxy() as data:
             dish = get_cur_dish(data)
             user = get_cur_user(data)
+            # print(user.tg_id)
             save_dish_event(from_dish_api_repr(dish), user)
             await callback.answer('SAVED!')
 
