@@ -94,7 +94,7 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
     elif callback.data.startswith(more_info_prefix):
         dish_id = callback.data.removeprefix(more_info_prefix)
         dish = db_manager.get_dish(dish_id)
-        await send_dish_info(callback, dish)
+        await send_dish_info_for_history(callback, dish)
 
     elif callback.data == 'hide':
         await callback.message.delete()

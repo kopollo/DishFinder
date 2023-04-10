@@ -13,7 +13,7 @@ def get_cur_dish(data: FSMContextProxy) -> DishApiRepr:
     """
     Extract dish from context manager.
 
-    :param data: dict with data with current user session info
+    :param data: context manager storage
     :return: DishApiRepr
     """
     return data['dishes'][data['cur_dish_id']]
@@ -23,7 +23,7 @@ def get_cur_user(data: FSMContextProxy) -> UserModel:
     """
     Extract user from context manager.
 
-    :param data: dict with data with current user session info
+    :param data: context manager storage
     :return: UserModel
     """
     return data['user']
@@ -33,7 +33,7 @@ def next_dish(data: FSMContextProxy):
     """
     Increase id in current user dishes list and bound it.
 
-    :param data: dict with data with current user session info
+    :param data: context manager storage
     :return: None
     """
     cur_dish_id = data['cur_dish_id']
@@ -44,7 +44,7 @@ def prev_dish(data: FSMContextProxy):
     """
     Decrease id in current user dishes list and bound it.
 
-    :param data: dict with data with current user session info
+    :param data: context manager storage
     :return: None
     """
     cur_dish_id = data['cur_dish_id']

@@ -1,3 +1,4 @@
+"""Contain initialization of bot, db, fsm storage, logger."""
 import os
 
 from aiogram import Bot, Dispatcher

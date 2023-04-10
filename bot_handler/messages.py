@@ -1,7 +1,9 @@
+"""Contain functions that control bot messages."""
 from aiogram.utils.exceptions import MessageNotModified
 from aiogram import types
 from aiogram.dispatcher.storage import FSMContextProxy
 
+from food_api_handler.food_searcher import DishApiRepr
 from .markup import start_kb, choose_kb, more_kb, hide_dish_kb
 from .setup import bot
 from .utils import get_cur_dish
@@ -9,6 +11,12 @@ from db import DishModel
 
 
 async def send_welcome_msg(chat_id):
+    """
+    Send welcome msg.
+
+    :param chat_id: chat id where to send a message
+    :return: None
+    """
     await bot.send_message(
         chat_id=chat_id,
         text='HI HI HI HI',
@@ -16,7 +24,14 @@ async def send_welcome_msg(chat_id):
     )
 
 
+# To implement multi languages better to add param text
 async def send_sorry_msg(chat_id):
+    """
+    Send sorry msg.
+
+    :param chat_id: chat id where to send a message
+    :return: None
+    """
     await bot.send_message(
         chat_id=chat_id,
         text="I'm sorry but I haven't find anything",
@@ -24,7 +39,14 @@ async def send_sorry_msg(chat_id):
     )
 
 
-async def update_dish_message(callback: types.CallbackQuery, dish):
+async def update_dish_message(callback: types.CallbackQuery, dish: DishApiRepr):
+    """
+    Update dist message to implement pagination.
+
+    :param callback: callback info from pressed btn
+    :param dish: DishApiRepr object
+    :return: None
+    """
     photo = types.InputMediaPhoto(media=dish.image_url,
                                   caption=dish.title)
     try:
@@ -40,6 +62,12 @@ async def update_dish_message(callback: types.CallbackQuery, dish):
 
 
 async def send_cur_dish_info(data: FSMContextProxy):
+    """
+    Send current dish from context manager.
+
+    :param data: context manager storage
+    :return:
+    """
     dish = get_cur_dish(data)
     await bot.send_photo(
         chat_id=data['chat_id'],
@@ -49,14 +77,29 @@ async def send_cur_dish_info(data: FSMContextProxy):
     )
 
 
-async def send_more_dish_info(callback: types.CallbackQuery, dish):
+async def send_more_dish_info(callback: types.CallbackQuery, dish: DishApiRepr):
+    """
+    Send message with dish ingredients.
+
+    :param callback: callback info from pressed btn
+    :param dish: DishApiRepr
+    :return: None
+    """
     await callback.message.answer(
         text=dish.instruction,
         reply_markup=more_kb,
     )
 
 
-async def send_dish_info(callback: types.CallbackQuery, dish: DishModel):
+async def send_dish_info_for_history(callback: types.CallbackQuery,
+                                     dish: DishModel):
+    """
+    Send message with dish photo with title for /history cmd.
+
+    :param callback: callback info from pressed btn
+    :param dish: DishModel obj
+    :return: None
+    """
     await callback.message.answer_photo(
         photo=dish.image_url,
         caption=dish.title,
