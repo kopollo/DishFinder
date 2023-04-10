@@ -3,6 +3,7 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 
 from bot_handler.setup import db_manager, dp
 from bot_handler.utils import init_fsm_proxy
+from db import UserModel
 
 
 class CheckUserMiddleware(BaseMiddleware):
@@ -15,6 +16,9 @@ class CheckUserMiddleware(BaseMiddleware):
             user_id = update.callback_query.message.from_user.id
             chat_id = update.callback_query.message.chat.id
 
+        if not db_manager.get_user(user_id):
+            user = UserModel(tg_id=user_id)
+            db_manager.add_user(user)
         state = dp.current_state(chat=chat_id, user=user_id)
         async with state.proxy() as data:
             if not data:
