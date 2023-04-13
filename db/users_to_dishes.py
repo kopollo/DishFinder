@@ -9,6 +9,7 @@ from db.dishes import DishModel
 
 class UsersToDishesModel(SqlAlchemyBase):
     """SqlAlchemy db model for user to dishes relation."""
+
     __tablename__ = 'users_to_dishes'
 
     id = sqlalchemy.Column(

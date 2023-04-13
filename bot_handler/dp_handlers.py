@@ -12,7 +12,7 @@ from .messages import *
 @dp.message_handler(commands=['find_dish'], state='*')
 async def find_dish_cmd(message: types.Message):
     """
-    Handle /find_dish command.
+    Handle /find_dish command, that set state to enter ingredients..
 
     :param message: input msg from user
     :return: None
@@ -25,7 +25,7 @@ async def find_dish_cmd(message: types.Message):
 @dp.message_handler(commands=['history'], state='*')
 async def check_history_cmd(message: types.Message, state: FSMContext):
     """
-    Handle /history command.
+    Handle /history command, that send to user saved dishes.
 
     :param message: input msg from user
     :param state: position in the final state machine
@@ -50,7 +50,7 @@ async def check_history_cmd(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=['start'], state='*')
 async def init_dialog_cmd(message: types.Message, state: FSMContext):
     """
-    Handle /start command.
+    Handle /start command, that send welcome msg.
 
     :param message: input msg from user
     :param state: position in the final state machine
