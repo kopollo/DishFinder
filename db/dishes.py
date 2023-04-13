@@ -1,9 +1,11 @@
+"""Contain DishModel."""
 import sqlalchemy
 
 from .db_session import SqlAlchemyBase
 
 
 class DishModel(SqlAlchemyBase):
+    """SqlAlchemy db model for dish."""
     __tablename__ = 'dishes'
 
     id = sqlalchemy.Column(

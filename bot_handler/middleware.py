@@ -8,8 +8,10 @@ from db import UserModel
 
 
 class CheckUserMiddleware(BaseMiddleware):
+    """Checks user existence in db, init runtime storage for user."""
 
     async def on_pre_process_update(self, update: types.Update, data: dict):
+        """Check msg and callback data before handlers."""
         try:
             user_id = update.message.from_user.id
             chat_id = update.message.chat.id
@@ -17,7 +19,7 @@ class CheckUserMiddleware(BaseMiddleware):
             user_id = update.callback_query.message.from_user.id
             chat_id = update.callback_query.message.chat.id
 
-        if not db_manager.get_user(user_id):
+        if not db_manager.is_user_exist(user_id):
             user = UserModel(tg_id=user_id)
             db_manager.add_user(user)
         state = dp.current_state(chat=chat_id, user=user_id)
