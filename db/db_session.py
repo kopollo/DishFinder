@@ -1,3 +1,4 @@
+"""Contain db initializer."""
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 from sqlalchemy.orm import Session
@@ -9,6 +10,12 @@ __factory = None
 
 
 def global_init(db_file):
+    """
+    Initialize the database if it doesn't exist.
+
+    :param db_file: db name
+    :return: None
+    """
     global __factory
 
     if __factory:
@@ -29,5 +36,6 @@ def global_init(db_file):
 
 
 def create_session() -> Session:
+    """Create db session."""
     global __factory
     return __factory()

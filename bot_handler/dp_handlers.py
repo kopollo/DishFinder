@@ -1,13 +1,22 @@
+"""Contain message and callback handlers."""
 import aiogram
 from aiogram.utils import executor
 
+from .markup import FindDishState, HistoryKeyboard
 from .middleware import CheckUserMiddleware
+from .setup import *
 from .utils import *
 from .messages import *
 
 
 @dp.message_handler(commands=['find_dish'], state='*')
 async def find_dish_cmd(message: types.Message):
+    """
+    Handle /find_dish command, that set state to enter ingredients..
+
+    :param message: input msg from user
+    :return: None
+    """
     await message.answer("Enter your ingredients split by ',' ")
     await FindDishState.enter_ingredients.set()
     await message.delete()
@@ -15,6 +24,13 @@ async def find_dish_cmd(message: types.Message):
 
 @dp.message_handler(commands=['history'], state='*')
 async def check_history_cmd(message: types.Message, state: FSMContext):
+    """
+    Handle /history command, that send to user saved dishes.
+
+    :param message: input msg from user
+    :param state: position in the final state machine
+    :return: None
+    """
     await FindDishState.history.set()
     dishes = filter_dishes(
         db_manager.get_all_user_dishes(message.from_user.id)
@@ -33,17 +49,28 @@ async def check_history_cmd(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=['start'], state='*')
 async def init_dialog_cmd(message: types.Message, state: FSMContext):
+    """
+    Handle /start command, that send welcome msg.
+
+    :param message: input msg from user
+    :param state: position in the final state machine
+    :return: None
+    """
     await state.reset_state(with_data=False)
     await send_welcome_msg(chat_id=message.from_user.id)
 
 
-test_input = 'nut'
-
-
 @dp.message_handler(state=FindDishState.enter_ingredients)
 async def enter_ingredients(message: types.Message, state: FSMContext):
+    """
+    Handle user input ingredients and call food api to get list of dishes.
+
+    :param message: input msg from user
+    :param state: position in the final state machine
+    :return: None
+    """
     ingredients = message.text
-    food_searcher.run(test_input)  # TODO
+    food_searcher.run(ingredients)
     dishes = food_searcher.get_dishes()
     try:
         async with state.proxy() as data:
@@ -57,6 +84,13 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(state=FindDishState.more_info)
 async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
+    """
+    Handle callback data in MoreInfoKeyboard.
+
+    :param callback: callback info from pressed btn
+    :param state: position in the final state machine
+    :return: None
+    """
     if callback.data == 'back':
         await callback.message.delete()
         async with state.proxy() as data:
@@ -69,12 +103,19 @@ async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
             dish = get_cur_dish(data)
             user = get_cur_user(data)
             # print(user.tg_id)
-            save_dish_event(from_dish_api_repr(dish), user)
+            db_manager.save_dish_event(from_dish_api_repr(dish), user)
             await callback.answer('SAVED!')
 
 
 @dp.callback_query_handler(state=FindDishState.history)
 async def history_callback(callback: types.CallbackQuery, state: FSMContext):
+    """
+    Handle callback data in HistoryKeyboard.
+
+    :param callback: callback info from pressed btn
+    :param state: position in the final state machine
+    :return: None
+    """
     more_info_prefix = 'dish_'
     if callback.data == 'back':
         await to_start(callback)
@@ -83,7 +124,7 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
     elif callback.data.startswith(more_info_prefix):
         dish_id = callback.data.removeprefix(more_info_prefix)
         dish = db_manager.get_dish(dish_id)
-        await send_dish_info(callback, dish)
+        await send_dish_info_for_history(callback, dish)
 
     elif callback.data == 'hide':
         await callback.message.delete()
@@ -93,6 +134,13 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(state=FindDishState.show_dishes)
 async def dish_list_callback(callback: types.CallbackQuery, state: FSMContext):
+    """
+    Handle callback data in ChooseDishKeyboard.
+
+    :param callback: callback info from pressed btn
+    :param state: position in the final state machine
+    :return: None
+    """
     navigation_btns = ['prev', 'next']
     async with state.proxy() as data:
         if callback.data == 'prev':
@@ -114,10 +162,7 @@ async def dish_list_callback(callback: types.CallbackQuery, state: FSMContext):
             await callback.answer()
 
 
-async def on_startup(_):
-    print('RUNNING')
-
-
 def run():
+    """Register middleware and start polling bot."""
     dp.middleware.setup(CheckUserMiddleware())
-    executor.start_polling(dp, on_startup=on_startup)
+    executor.start_polling(dp)
