@@ -1,4 +1,6 @@
+"""Wrappers for raw json."""
 import os
+from typing import Optional
 
 import requests
 
@@ -6,6 +8,13 @@ FOOD_API_TOKEN = os.environ.get('FOOD_API_TOKEN')
 
 
 def get_request(server: str, params: dict[str, str] = None):
+    """
+    Make GET request to server with given params.
+
+    :param server: where we want to make a request
+    :param params: with what parameters
+    :return: response
+    """
     try:
         response = requests.get(server, params)
         if not response:
@@ -19,14 +28,17 @@ def get_request(server: str, params: dict[str, str] = None):
 
 
 class SearchByIngredientsRequest:
+    """Wrapper for findByIngredients request."""
+
     API_URL = 'https://api.spoonacular.com/recipes/findByIngredients'
 
     def __init__(self, ingredients):
+        """Init obj to search full recipe."""
         self.ingredients = ingredients
         self.dish_number = 5
-        self.row_json = self._get_row_json()
+        self.raw_json = self._get_raw_json()
 
-    def _get_row_json(self):
+    def _get_raw_json(self):
         params = {
             'ingredients': self.ingredients,
             'apiKey': FOOD_API_TOKEN,
@@ -39,27 +51,39 @@ class SearchByIngredientsRequest:
         return response.json()
 
     def get_all_dishes(self):
+        """
+        Extract from the json require dish info.
+
+        :return: tuple(title, id, image_url)
+        """
         dishes = []
-        for i in range(len(self.row_json)):
-            title = self.row_json[i]['title']
-            dish_id = self.row_json[i]['id']
-            image_url = self.row_json[i]['image']
+        for i in range(len(self.raw_json)):
+            title = self.raw_json[i]['title']
+            dish_id = self.raw_json[i]['id']
+            image_url = self.raw_json[i]['image']
             dishes.append((title, dish_id, image_url))
         return dishes
 
-    def get_dish_ingredients(self):  # or other dop info
+    def _get_dish_ingredients(self):
         # besides instructions, we are also need a list of ingred
         pass
 
 
 class GetRecipeInstructionsRequest:
+    """Wrapper for get analyzedInstructions request."""
 
     def __init__(self, dish_id):
+        """
+        Init api url by dish_id.
+
+        :param dish_id:
+        """
         self.dish_id = dish_id
         self.api_url = f'https://api.spoonacular.com/recipes/{dish_id}/analyzedInstructions'
-        self.row_json = self._get_row_json()
+        self.raw_json = self._get_raw_json()
 
-    def _get_row_json(self):
+    def _get_raw_json(self):
+        """Make a get request."""
         params = {
             'apiKey': FOOD_API_TOKEN,
         }
@@ -69,9 +93,14 @@ class GetRecipeInstructionsRequest:
         )
         return response.json()
 
-    def get_instruction(self):
+    def get_instruction(self) -> Optional[list[str]]:
+        """
+        Get full instruction for dish or None if broken or incorrect dish.
+
+        :return: str or None
+        """
         try:
-            steps = self.row_json[0]['steps']
+            steps = self.raw_json[0]['steps']
         except IndexError:
             return None
         if len(steps) <= 1:

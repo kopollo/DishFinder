@@ -1,3 +1,4 @@
+"""Entrance point of program."""
 from db import db_session
 from bot_handler import dp_handlers
 if __name__ == "__main__":
