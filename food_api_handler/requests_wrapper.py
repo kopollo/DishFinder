@@ -24,18 +24,18 @@ class SearchByIngredientsRequest:
     """Wrapper for findByIngredients request."""
 
     API_URL = 'https://api.spoonacular.com/recipes/findByIngredients'
+    DISH_NUMBER = 5
 
-    def __init__(self, ingredients):
+    def __init__(self, ingredients: str):
         """Init obj to search full recipe."""
         self.ingredients = ingredients
-        self.dish_number = 1
         self.raw_json = self._get_raw_json()
 
     def _get_raw_json(self):
         params = {
             'ingredients': self.ingredients,
             'apiKey': FOOD_API_TOKEN,
-            'number': self.dish_number
+            'number': self.DISH_NUMBER
         }
         response = get_request(
             server=self.API_URL,
@@ -76,7 +76,7 @@ class SearchByIngredientsRequest:
     def _format_ingredients(self, ingredients: list[str]) -> str:
         formatted_ingredients = ""
         for idx, eng in enumerate(ingredients):
-            line = f'{idx + 1}) {eng}\n\n'
+            line = f'{idx + 1}) {eng}\n'
             formatted_ingredients += line
         return formatted_ingredients
 

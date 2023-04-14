@@ -5,22 +5,35 @@ from .requests_wrapper import SearchByIngredientsRequest, \
 
 
 class FoodApiManager:
-    """Handler for food api requests."""
+    """Creator and initializer of DishApiRepr objects."""
 
     def __init__(self, ingredients):
-        self.ingredients = ingredients
-        self.dishes = SearchByIngredientsRequest(self.ingredients).init_dishes()
+        """
+        Init DishApiRepr objects.
+
+        :param ingredients: user input
+        """
+        self.dishes = SearchByIngredientsRequest(ingredients).init_dishes()
         self._init_instruction_for_dishes()
 
     def _init_instruction_for_dishes(self) -> None:
+        """Init instructions for all dishes."""
         for i, dish in enumerate(self.dishes):
             self._set_instruction(dish)
 
     def _set_instruction(self, dish: DishApiRepr):
+        """
+        Set instruction for dish.
+
+        :param dish:
+        :return:
+        """
         dish_id = dish.id
         instruction = GetRecipeInstructionsRequest(dish_id).get_instruction()
+        if instruction is None:
+            instruction = 'No recipe found'
         dish.instruction = instruction
 
     def get_dishes(self) -> list[DishApiRepr]:
-        """Return list[DishApiRepr] with dishes."""
+        """Return list[DishApiRepr]."""
         return self.dishes
