@@ -64,6 +64,12 @@ class SearchByIngredientsRequest:
         return dishes
 
     def _get_dish_ingredients(self, row) -> str:
+        """
+        Extract ingredients from json.
+
+        :param row: dish json record
+        :return: formatted str with ingredients
+        """
         ingredients = []
         for ingredient in (row["usedIngredients"]):
             ingredients.append(ingredient['original'])
@@ -74,6 +80,12 @@ class SearchByIngredientsRequest:
         return self._format_ingredients(ingredients)
 
     def _format_ingredients(self, ingredients: list[str]) -> str:
+        """
+        Format list of ingredients to str.
+
+        :param ingredients: list of ingredients
+        :return: str
+        """
         formatted_ingredients = ""
         for idx, eng in enumerate(ingredients):
             line = f'{idx + 1}) {eng}\n'
@@ -124,6 +136,12 @@ class GetRecipeInstructionsRequest:
         return self._format_instruction(instruction)
 
     def _format_instruction(self, instruction: list):
+        """
+        Format list of instruction actions to str.
+
+        :param instruction: list of instruction
+        :return: str
+        """
         formatted_instruction = ""
         for idx, step in enumerate(instruction):
             line = f'{idx + 1}) {step}\n\n'

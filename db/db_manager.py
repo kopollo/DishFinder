@@ -30,6 +30,7 @@ class DBManager:
         """
         db_sess = db_session.create_session()
         dish = db_sess.query(DishModel).filter(DishModel.id == dish_id).first()
+        db_sess.close()
         return dish
 
     def add_user(self, user: UserModel):
