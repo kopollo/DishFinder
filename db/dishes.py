@@ -16,3 +16,4 @@ class DishModel(SqlAlchemyBase):
     title = sqlalchemy.Column(sqlalchemy.String)
     image_url = sqlalchemy.Column(sqlalchemy.String)
     instruction = sqlalchemy.Column(sqlalchemy.String)
+    ingredients = sqlalchemy.Column(sqlalchemy.String)

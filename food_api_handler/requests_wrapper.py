@@ -1,48 +1,41 @@
-"""Wrappers for raw json."""
+"""Wrappers for food api requests."""
 import os
 from typing import Optional
 
 import requests
 
+from dataclasses import dataclass
+
 FOOD_API_TOKEN = os.environ.get('FOOD_API_TOKEN')
 
 
-def get_request(server: str, params: dict[str, str] = None):
-    """
-    Make GET request to server with given params.
+@dataclass()
+class DishApiRepr:
+    """Representation of dish api object."""
 
-    :param server: where we want to make a request
-    :param params: with what parameters
-    :return: response
-    """
-    try:
-        response = requests.get(server, params)
-        if not response:
-            print('Server is sad with status code', response.status_code)
-            print(response.reason)
-            return response
-        return response
-    except requests.RequestException as exc:
-        print('Oh ship :(')
-        print(exc)
+    title: str
+    id: int
+    image_url: str
+    ingredients: str
+    instruction: str = ""
 
 
 class SearchByIngredientsRequest:
     """Wrapper for findByIngredients request."""
 
     API_URL = 'https://api.spoonacular.com/recipes/findByIngredients'
+    DISH_NUMBER = 5
 
-    def __init__(self, ingredients):
+    def __init__(self, ingredients: str):
         """Init obj to search full recipe."""
         self.ingredients = ingredients
-        self.dish_number = 5
         self.raw_json = self._get_raw_json()
 
     def _get_raw_json(self):
         params = {
             'ingredients': self.ingredients,
             'apiKey': FOOD_API_TOKEN,
-            'number': self.dish_number
+            'number': self.DISH_NUMBER
         }
         response = get_request(
             server=self.API_URL,
@@ -50,23 +43,54 @@ class SearchByIngredientsRequest:
         )
         return response.json()
 
-    def get_all_dishes(self):
+    def init_dishes(self) -> list[DishApiRepr]:
         """
         Extract from the json require dish info.
 
         :return: tuple(title, id, image_url)
         """
-        dishes = []
+        dishes: list[DishApiRepr] = []
         for i in range(len(self.raw_json)):
             title = self.raw_json[i]['title']
             dish_id = self.raw_json[i]['id']
             image_url = self.raw_json[i]['image']
-            dishes.append((title, dish_id, image_url))
+            ingredients = self._get_dish_ingredients(self.raw_json[i])
+            dishes.append(DishApiRepr(
+                title=title,
+                id=dish_id,
+                image_url=image_url,
+                ingredients=ingredients,
+            ))
         return dishes
 
-    def _get_dish_ingredients(self):
-        # besides instructions, we are also need a list of ingred
-        pass
+    def _get_dish_ingredients(self, row) -> str:
+        """
+        Extract ingredients from json.
+
+        :param row: dish json record
+        :return: formatted str with ingredients
+        """
+        ingredients = []
+        for ingredient in (row["usedIngredients"]):
+            ingredients.append(ingredient['original'])
+
+        for ingredient in (row["missedIngredients"]):
+            ingredients.append(ingredient['original'])
+
+        return self._format_ingredients(ingredients)
+
+    def _format_ingredients(self, ingredients: list[str]) -> str:
+        """
+        Format list of ingredients to str.
+
+        :param ingredients: list of ingredients
+        :return: str
+        """
+        formatted_ingredients = ""
+        for idx, eng in enumerate(ingredients):
+            line = f'{idx + 1}) {eng}\n'
+            formatted_ingredients += line
+        return formatted_ingredients
 
 
 class GetRecipeInstructionsRequest:
@@ -93,7 +117,7 @@ class GetRecipeInstructionsRequest:
         )
         return response.json()
 
-    def get_instruction(self) -> Optional[list[str]]:
+    def get_instruction(self) -> Optional[str]:
         """
         Get full instruction for dish or None if broken or incorrect dish.
 
@@ -109,4 +133,37 @@ class GetRecipeInstructionsRequest:
         instruction = []
         for i in range(len(steps)):
             instruction.append(steps[i]["step"])
-        return instruction
+        return self._format_instruction(instruction)
+
+    def _format_instruction(self, instruction: list):
+        """
+        Format list of instruction actions to str.
+
+        :param instruction: list of instruction
+        :return: str
+        """
+        formatted_instruction = ""
+        for idx, step in enumerate(instruction):
+            line = f'{idx + 1}) {step}\n\n'
+            formatted_instruction += line
+        return formatted_instruction
+
+
+def get_request(server: str, params: dict[str, str] = None):
+    """
+    Make GET request to server with given params.
+
+    :param server: where we want to make a request
+    :param params: with what parameters
+    :return: response
+    """
+    try:
+        response = requests.get(server, params)
+        if not response:
+            print('Server is sad with status code', response.status_code)
+            print(response.reason)
+            return response
+        return response
+    except requests.RequestException as exc:
+        print('Oh ship :(')
+        print(exc)

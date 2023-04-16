@@ -7,6 +7,7 @@ from .middleware import CheckUserMiddleware
 from .setup import *
 from .utils import *
 from .messages import *
+from food_api_handler.food_searcher import FoodApiManager
 
 
 @dp.message_handler(commands=['find_dish'], state='*')
@@ -70,8 +71,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     :return: None
     """
     ingredients = message.text
-    food_searcher.run(ingredients)
-    dishes = food_searcher.get_dishes()
+    dishes = FoodApiManager(ingredients).get_dishes()
     try:
         async with state.proxy() as data:
             data['dishes'] = dishes
@@ -102,7 +102,6 @@ async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
         async with state.proxy() as data:
             dish = get_cur_dish(data)
             user = get_cur_user(data)
-            # print(user.tg_id)
             db_manager.save_dish_event(from_dish_api_repr(dish), user)
             await callback.answer('SAVED!')
 

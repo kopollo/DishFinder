@@ -41,14 +41,15 @@ async def send_sorry_msg(chat_id):
 
 async def update_dish_message(callback: types.CallbackQuery, dish: DishApiRepr):
     """
-    Update dist message to implement pagination.
+    Update dish message to implement pagination.
 
     :param callback: callback info from pressed btn
     :param dish: DishApiRepr object
     :return: None
     """
+    caption = dish.title + '\n' + '\n' + dish.ingredients
     photo = types.InputMediaPhoto(media=dish.image_url,
-                                  caption=dish.title)
+                                  caption=caption)
     try:
         await bot.edit_message_media(
             chat_id=callback.from_user.id,
@@ -69,11 +70,12 @@ async def send_cur_dish_info(data: FSMContextProxy):
     :return:
     """
     dish = get_cur_dish(data)
+    caption = dish.title + '\n' + '\n' + dish.ingredients
     await bot.send_photo(
         chat_id=data['chat_id'],
         reply_markup=choose_kb,
         photo=dish.image_url,
-        caption=dish.title,
+        caption=caption,
     )
 
 
