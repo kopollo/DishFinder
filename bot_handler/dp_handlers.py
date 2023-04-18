@@ -75,6 +75,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
             data['dishes'] = dishes
+            data['cur_dish_id'] = 0
             await FindDishState.show_dishes.set()
             await send_cur_dish_info(data)
     except IndexError:
