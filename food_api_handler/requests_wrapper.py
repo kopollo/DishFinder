@@ -104,7 +104,7 @@ class GetRecipeInstructionsRequest:
         :param dish_id:
         """
         self.dish_id = dish_id
-        self.api_url = f'https://api.spoonacular.com/recipes/{dish_id}/analyzedInstructions'
+        self.api_url = f'https://api.spoonacular.com/recipes/{dish_id}/analyzedInstructions'  # noqa
         self.raw_json = self._get_raw_json()
 
     def _get_raw_json(self):
