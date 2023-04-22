@@ -41,6 +41,7 @@ class SearchByIngredientsRequest:
             server=self.API_URL,
             params=params
         )
+        # print(response.url)
         return response.json()
 
     def init_dishes(self) -> list[DishApiRepr]:
@@ -103,7 +104,7 @@ class GetRecipeInstructionsRequest:
         :param dish_id:
         """
         self.dish_id = dish_id
-        self.api_url = f'https://api.spoonacular.com/recipes/{dish_id}/analyzedInstructions'
+        self.api_url = f'https://api.spoonacular.com/recipes/{dish_id}/analyzedInstructions'  # noqa
         self.raw_json = self._get_raw_json()
 
     def _get_raw_json(self):
@@ -111,11 +112,14 @@ class GetRecipeInstructionsRequest:
         params = {
             'apiKey': FOOD_API_TOKEN,
         }
-        response = get_request(
-            self.api_url,
-            params,
-        )
-        return response.json()
+        try:
+            response = get_request(
+                self.api_url,
+                params,
+            )
+            return response.json()
+        except Exception:
+            return {}
 
     def get_instruction(self) -> Optional[str]:
         """
@@ -135,7 +139,7 @@ class GetRecipeInstructionsRequest:
             instruction.append(steps[i]["step"])
         return self._format_instruction(instruction)
 
-    def _format_instruction(self, instruction: list):
+    def _format_instruction(self, instruction: list) -> str:
         """
         Format list of instruction actions to str.
 

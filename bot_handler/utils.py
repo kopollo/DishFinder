@@ -90,7 +90,7 @@ def format_dishes_for_message(dishes: list[DishModel]) -> str:
     """
     ans = ''
     for i, dish in enumerate(dishes):
-        ans += f'{i} ) {dish.title}\n'
+        ans += f'{i}) {dish.title}\n'
     return ans
 
 

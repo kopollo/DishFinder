@@ -1,4 +1,6 @@
 """Contain db manager."""
+from typing import Optional
+
 from sqlalchemy import desc
 
 from . import db_session
@@ -10,7 +12,7 @@ from .users_to_dishes import UsersToDishesModel
 class DBManager:
     """Combine all functions working with the database (controller)."""
 
-    def add_dish(self, dish: DishModel):
+    def add_dish(self, dish: DishModel) -> None:
         """
         Add dish to db.
 
@@ -21,7 +23,7 @@ class DBManager:
         db_sess.merge(dish)
         db_sess.commit()
 
-    def get_dish(self, dish_id: int) -> DishModel:
+    def get_dish(self, dish_id: int) -> Optional[DishModel]:
         """
         Get dish from db by id.
 
@@ -33,7 +35,7 @@ class DBManager:
         db_sess.close()
         return dish
 
-    def add_user(self, user: UserModel):
+    def add_user(self, user: UserModel) -> None:
         """
         Add user to db.
 
@@ -44,7 +46,7 @@ class DBManager:
         db_sess.merge(user)
         db_sess.commit()
 
-    def get_user(self, user_id: int) -> UserModel:
+    def get_user(self, user_id: int) -> Optional[UserModel]:
         """
         Get user from db by id.
 
@@ -68,9 +70,10 @@ class DBManager:
             UserModel.tg_id == user_id).first() is not None
         return exists
 
-    def _add_user_to_dish_association(self,
-                                      user_id: UserModel,
-                                      dish_id: DishModel):
+    def _add_user_to_dish_association(
+            self,
+            user_id: UserModel,
+            dish_id: DishModel) -> None:
         """
         Add user to dish association to db.
 

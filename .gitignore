@@ -1,5 +1,4 @@
 .idea
 __pycache__
 .bashrc
-note.txt
-info.txt
+pytest.ini
