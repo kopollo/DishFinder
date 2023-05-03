@@ -4,8 +4,8 @@ from aiogram import types
 from aiogram.dispatcher.storage import FSMContextProxy
 
 from food_api_handler.food_searcher import DishApiRepr
-from .markup import start_kb, choose_kb, more_kb, hide_dish_kb
-from .setup import bot
+from .markup import start_kb, choose_kb, more_kb, history_dish_info_kb
+from .setup import bot, db_manager
 from .utils import get_cur_dish
 from db import DishModel
 
@@ -79,7 +79,20 @@ async def send_cur_dish_info(data: FSMContextProxy):
     )
 
 
-async def send_more_dish_info(callback: types.CallbackQuery, dish: DishApiRepr):
+async def send_history_dish_info(callback: types.CallbackQuery,
+                                 dish_id: int) -> None:
+    dish = db_manager.get_dish(dish_id)
+    caption = dish.title + '\n' + '\n' + dish.ingredients
+    await bot.send_photo(
+        chat_id=callback.from_user.id,
+        reply_markup=history_dish_info_kb,
+        photo=dish.image_url,
+        caption=caption,
+    )
+
+
+async def send_dish_instruction(callback: types.CallbackQuery,
+                                dish: DishApiRepr):
     """
     Send message with dish ingredients.
 
@@ -104,6 +117,6 @@ async def send_dish_info_for_history(callback: types.CallbackQuery,
     """
     await callback.message.answer_photo(
         photo=dish.image_url,
-        caption=dish.title,
+        caption='x',
         reply_markup=hide_dish_kb,
     )

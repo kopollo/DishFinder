@@ -83,7 +83,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
         await state.reset_state(with_data=False)
 
 
-@dp.callback_query_handler(state=FindDishState.more_info)
+@dp.callback_query_handler(state=FindDishState.show_instruction)
 async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
     """
     Handle callback data in MoreInfoKeyboard.
@@ -122,11 +122,11 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
         await state.reset_state(with_data=False)
 
     elif callback.data.startswith(more_info_prefix):
-        dish_id = callback.data.removeprefix(more_info_prefix)
-        dish = db_manager.get_dish(dish_id)
-        await send_dish_info_for_history(callback, dish)
+        dish_id = int(callback.data.removeprefix(more_info_prefix))
+        # set new state
+        await send_history_dish_info(dish_id=dish_id, callback=callback)
 
-    elif callback.data == 'hide':
+    elif callback.data == 'show_instruction':
         await callback.message.delete()
 
     await callback.answer()
@@ -149,8 +149,8 @@ async def dish_list_callback(callback: types.CallbackQuery, state: FSMContext):
             next_dish(data)
         elif callback.data == 'more':
             await callback.message.delete()
-            await send_more_dish_info(callback, dish=get_cur_dish(data))
-            await FindDishState.more_info.set()
+            await send_dish_instruction(callback, dish=get_cur_dish(data))
+            await FindDishState.show_instruction.set()
             await callback.answer()
 
         elif callback.data == 'stop':

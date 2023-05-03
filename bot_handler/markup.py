@@ -7,12 +7,13 @@ from db import DishModel
 
 
 class FindDishState(StatesGroup):
-    """State manager for aiogram fsm."""
+    """State manager for aiogram final state machine."""
 
     enter_ingredients = State()
     show_dishes = State()
-    more_info = State()
+    show_instruction = State()
     history = State()
+    history_full_recipe = State()
 
 
 class StartKeyboard:
@@ -92,18 +93,29 @@ class HistoryKeyboard:
         return history_kb
 
 
-class HideDishKeyboard:
-    """Keyboard to hide dishes info msg's for history state."""
-
-    hide_kb = InlineKeyboardMarkup()
-    hide_btn = InlineKeyboardButton(
-        text='hide',
-        callback_data='hide'
+class HistoryDishInfoKeyboard:
+    dish_info_kb = InlineKeyboardMarkup()
+    back_btn = InlineKeyboardButton(
+        text='back',
+        callback_data='back'
     )
-    hide_kb.add(hide_btn)
+    save_btn = InlineKeyboardButton(
+        text='show instruction',
+        callback_data='show_instruction',
+    )
+    dish_info_kb.add(back_btn, save_btn)
+# class HideDishKeyboard:
+#     """Keyboard to hide dishes info msg's for history state."""
+#
+#     hide_kb = InlineKeyboardMarkup()
+#     hide_btn = InlineKeyboardButton(
+#         text='hide',
+#         callback_data='hide'
+#     )
+#     hide_kb.add(hide_btn)
 
 
 start_kb = StartKeyboard.start_kb
 choose_kb = ChooseDishKeyboard.choose_kb
 more_kb = MoreInfoKeyboard.more_kb
-hide_dish_kb = HideDishKeyboard.hide_kb
+history_dish_info_kb = HistoryDishInfoKeyboard.dish_info_kb
