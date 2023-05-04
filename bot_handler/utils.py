@@ -7,6 +7,7 @@ from db import DishModel, UserModel
 from .markup import start_kb
 
 from food_api_handler.food_searcher import DishApiRepr
+from .setup import db_manager
 
 
 def get_cur_dish(data: FSMContextProxy) -> DishApiRepr:
@@ -76,7 +77,7 @@ async def to_start(callback: types.CallbackQuery):
     await callback.answer()
 
 
-def filter_dishes(dishes: list[DishModel]):
+def filter_dishes(dishes: list[DishModel]) -> list[DishModel]:
     """Bound dishes to show user by 10."""
     return dishes[:10]
 
@@ -105,3 +106,20 @@ async def init_fsm_proxy(state: FSMContext, to_store: dict):
     async with state.proxy() as data:
         for key, value in to_store.items():
             data[key] = value
+
+
+def get_dishes_to_history(user_id: int) -> list[DishModel]:
+    dishes = filter_dishes(
+        db_manager.get_all_user_dishes(user_id)
+    )
+    return dishes
+
+
+async def save_history_dish_in_proxy(dish: DishModel, state: FSMContext):
+    async with state.proxy() as data:
+        data['history_dish'] = dish
+
+
+async def extract_history_dish(state: FSMContext) -> DishModel:
+    async with state.proxy() as data:
+        return data['history_dish']

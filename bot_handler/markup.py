@@ -13,7 +13,8 @@ class FindDishState(StatesGroup):
     show_dishes = State()
     show_instruction = State()
     history = State()
-    history_full_recipe = State()
+    show_history_dish = State()
+    history_show_instruction = State()
 
 
 class StartKeyboard:
@@ -104,18 +105,23 @@ class HistoryDishInfoKeyboard:
         callback_data='show_instruction',
     )
     dish_info_kb.add(back_btn, save_btn)
-# class HideDishKeyboard:
-#     """Keyboard to hide dishes info msg's for history state."""
-#
-#     hide_kb = InlineKeyboardMarkup()
-#     hide_btn = InlineKeyboardButton(
-#         text='hide',
-#         callback_data='hide'
-#     )
-#     hide_kb.add(hide_btn)
+
+
+class HistoryDishInstructionKeyboard:
+    """Keyboard to hide dishes info msg's for history state."""
+    kb = InlineKeyboardMarkup()
+    back_btn = InlineKeyboardButton(
+        text='back',
+        callback_data='back'
+    )
+    kb.add(back_btn)
+
+    # def __call__(self, *args, **kwargs):
+    #     return self.kb
 
 
 start_kb = StartKeyboard.start_kb
 choose_kb = ChooseDishKeyboard.choose_kb
 more_kb = MoreInfoKeyboard.more_kb
 history_dish_info_kb = HistoryDishInfoKeyboard.dish_info_kb
+history_dish_instruction_kb = HistoryDishInstructionKeyboard.kb
