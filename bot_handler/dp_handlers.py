@@ -1,8 +1,7 @@
 """Contain message and callback handlers."""
-import aiogram
 from aiogram.utils import executor
 
-from .markup import FindDishState, HistoryKeyboard
+from .markup import FindDishState
 from .middleware import CheckUserMiddleware
 from .setup import *
 from .utils import *
@@ -131,6 +130,7 @@ async def show_dish_in_history(callback: types.CallbackQuery,
     elif callback.data == 'show_instruction':
         dish = await extract_history_dish(state)
         await FindDishState.history_show_instruction.set()
+        await callback.message.delete()
         await show_instruction_in_history(callback=callback, dish=dish)
 
     await callback.answer()
@@ -164,15 +164,14 @@ async def dish_list_callback(callback: types.CallbackQuery, state: FSMContext):
             await callback.message.delete()
             await send_dish_instruction(callback, dish=get_cur_dish(data))
             await FindDishState.show_instruction.set()
-            await callback.answer()
-
         elif callback.data == 'stop':
             await to_start(callback)
             await state.reset_state(with_data=False)
 
         if callback.data in navigation_btns:
             await update_dish_message(callback, dish=get_cur_dish(data))
-            await callback.answer()
+
+        await callback.answer()
 
 
 def run():

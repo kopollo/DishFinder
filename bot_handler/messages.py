@@ -5,8 +5,9 @@ from aiogram import types
 from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 
 from food_api_handler.food_searcher import DishApiRepr
-from .markup import start_kb, choose_kb, more_kb, history_dish_info_kb, \
-    HistoryKeyboard, history_dish_instruction_kb
+from .markup import HistoryKeyboard, HistoryDishInstructionKeyboard, \
+    StartKeyboard, HistoryDishInfoKeyboard, ChooseDishKeyboard, \
+    ShowInstructionKeyboard
 from .setup import bot, db_manager
 from .utils import get_cur_dish, format_dishes_for_message, filter_dishes, \
     get_dishes_to_history
@@ -23,7 +24,7 @@ async def send_welcome_msg(chat_id):
     await bot.send_message(
         chat_id=chat_id,
         text='HI HI HI HI',
-        reply_markup=start_kb,
+        reply_markup=StartKeyboard(),
     )
 
 
@@ -38,7 +39,7 @@ async def send_sorry_msg(chat_id):
     await bot.send_message(
         chat_id=chat_id,
         text="I'm sorry but I haven't find anything",
-        reply_markup=start_kb,
+        reply_markup=StartKeyboard(),
     )
 
 
@@ -58,7 +59,7 @@ async def update_dish_message(callback: types.CallbackQuery, dish: DishApiRepr):
             chat_id=callback.from_user.id,
             message_id=callback.message.message_id,
             media=photo,
-            reply_markup=choose_kb,
+            reply_markup=ChooseDishKeyboard(),
         )
     except MessageNotModified:
         print('same as before')
@@ -75,7 +76,7 @@ async def send_cur_dish_info(data: FSMContextProxy):
     caption = dish.title + '\n' + '\n' + dish.ingredients
     await bot.send_photo(
         chat_id=data['chat_id'],
-        reply_markup=choose_kb,
+        reply_markup=ChooseDishKeyboard(),
         photo=dish.image_url,
         caption=caption,
     )
@@ -87,7 +88,7 @@ async def send_history_dish_info(callback: types.CallbackQuery,
     await callback.message.delete()
     await bot.send_photo(
         chat_id=callback.from_user.id,
-        reply_markup=history_dish_info_kb,
+        reply_markup=HistoryDishInfoKeyboard(),
         photo=dish.image_url,
         caption=caption,
     )
@@ -104,7 +105,7 @@ async def send_dish_instruction(callback: types.CallbackQuery,
     """
     await callback.message.answer(
         text=dish.instruction,
-        reply_markup=more_kb,
+        reply_markup=ShowInstructionKeyboard(),
     )
 
 
@@ -116,34 +117,16 @@ async def send_history_widget(user_id: int, state: FSMContext):
         await bot.send_message(
             chat_id=user_id,
             text=format_dishes_for_message(dishes),
-            reply_markup=HistoryKeyboard.generate_kb(dishes),
+            reply_markup=HistoryKeyboard(dishes),
         )
     except aiogram.utils.exceptions.MessageTextIsEmpty:
         await send_sorry_msg(user_id)
         await state.reset_state(with_data=False)
 
 
-async def upd_history_widget(user_id: int, state: FSMContext):
-    dishes = get_dishes_to_history(user_id)
-
-    # TODO abort_if_empty_storage except (except statement) much prettier.
-    try:
-        await bot.edit_message_text(
-            chat_id=user_id,
-            text=format_dishes_for_message(dishes),
-            reply_markup=HistoryKeyboard.generate_kb(dishes),
-        )
-    except aiogram.utils.exceptions.MessageTextIsEmpty:
-        await send_sorry_msg(user_id)
-        await state.reset_state(with_data=False)
-
-
-async def show_instruction_in_history(
-        callback: types.CallbackQuery,
-        dish: DishApiRepr):
-
-    await callback.message.delete()
+async def show_instruction_in_history(callback: types.CallbackQuery,
+                                      dish: DishApiRepr):
     await callback.message.answer(
         text=dish.instruction,
-        reply_markup=history_dish_instruction_kb,
+        reply_markup=HistoryDishInstructionKeyboard(),
     )

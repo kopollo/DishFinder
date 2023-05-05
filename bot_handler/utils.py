@@ -4,7 +4,7 @@ from aiogram import types
 from dataclasses import asdict
 
 from db import DishModel, UserModel
-from .markup import start_kb
+from .markup import StartKeyboard
 
 from food_api_handler.food_searcher import DishApiRepr
 from .setup import db_manager
@@ -71,8 +71,7 @@ async def to_start(callback: types.CallbackQuery):
     :return:
     """
     text = """welcome back"""
-    await callback.message.answer(text=text,
-                                  reply_markup=start_kb)
+    await callback.message.answer(text=text, reply_markup=StartKeyboard())
     await callback.message.delete()
     await callback.answer()
 
