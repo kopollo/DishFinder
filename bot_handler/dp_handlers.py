@@ -1,8 +1,7 @@
 """Contain message and callback handlers."""
-import aiogram
 from aiogram.utils import executor
 
-from .markup import FindDishState, HistoryKeyboard
+from .markup import FindDishState
 from .middleware import CheckUserMiddleware
 from .setup import *
 from .utils import *
@@ -33,19 +32,7 @@ async def check_history_cmd(message: types.Message, state: FSMContext):
     :return: None
     """
     await FindDishState.history.set()
-    dishes = filter_dishes(
-        db_manager.get_all_user_dishes(message.from_user.id)
-    )
-    ans = format_dishes_for_message(dishes)
-    try:
-        await bot.send_message(
-            chat_id=message.from_user.id,
-            text=ans,
-            reply_markup=HistoryKeyboard.generate_kb(dishes),
-        )
-    except aiogram.utils.exceptions.MessageTextIsEmpty:
-        await send_sorry_msg(message.from_user.id)
-        await state.reset_state(with_data=False)
+    await send_history_widget(user_id=message.from_user.id, state=state)
 
 
 @dp.message_handler(commands=['start'], state='*')
@@ -83,8 +70,9 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
         await state.reset_state(with_data=False)
 
 
-@dp.callback_query_handler(state=FindDishState.more_info)
-async def more_info_callback(callback: types.CallbackQuery, state: FSMContext):
+@dp.callback_query_handler(state=FindDishState.show_instruction)
+async def show_instruction_callback(callback: types.CallbackQuery,
+                                    state: FSMContext):
     """
     Handle callback data in MoreInfoKeyboard.
 
@@ -122,14 +110,53 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
         await state.reset_state(with_data=False)
 
     elif callback.data.startswith(more_info_prefix):
-        dish_id = callback.data.removeprefix(more_info_prefix)
-        dish = db_manager.get_dish(dish_id)
-        await send_dish_info_for_history(callback, dish)
-
-    elif callback.data == 'hide':
-        await callback.message.delete()
+        dish_id = int(callback.data.removeprefix(more_info_prefix))
+        dish: DishModel = db_manager.get_dish(dish_id)
+        await save_history_dish_in_proxy(dish=dish, state=state)
+        await FindDishState.show_history_dish.set()
+        await send_history_dish_info(dish=dish, callback=callback)
 
     await callback.answer()
+
+
+@dp.callback_query_handler(state=FindDishState.show_history_dish)
+async def show_dish_in_history(callback: types.CallbackQuery,
+                               state: FSMContext):
+    """
+    Handle callback data in HistoryDishInfoKeyboard.
+
+    :param callback: callback info from pressed btn
+    :param state: position in the final state machine
+    :return: None
+    """
+    if callback.data == 'back':
+        await FindDishState.history.set()
+        await callback.message.delete()
+        await send_history_widget(user_id=callback.from_user.id, state=state)
+
+    elif callback.data == 'show_instruction':
+        dish = await get_proxy_history_dish(state)
+        await FindDishState.history_show_instruction.set()
+        await callback.message.delete()
+        await show_instruction_in_history(callback=callback, dish=dish)
+
+    await callback.answer()
+
+
+@dp.callback_query_handler(state=FindDishState.history_show_instruction)
+async def show_dish_instruction_in_history(callback: types.CallbackQuery,
+                                           state: FSMContext):
+    """
+    Handle callback data in HistoryDishInstructionKeyboard.
+
+    :param callback: callback info from pressed btn
+    :param state: position in the final state machine
+    :return: None
+    """
+    if callback.data == 'back':
+        dish = await get_proxy_history_dish(state)
+        await FindDishState.show_history_dish.set()
+        await send_history_dish_info(dish=dish, callback=callback)
 
 
 @dp.callback_query_handler(state=FindDishState.show_dishes)
@@ -149,17 +176,16 @@ async def dish_list_callback(callback: types.CallbackQuery, state: FSMContext):
             next_dish(data)
         elif callback.data == 'more':
             await callback.message.delete()
-            await send_more_dish_info(callback, dish=get_cur_dish(data))
-            await FindDishState.more_info.set()
-            await callback.answer()
-
+            await send_dish_instruction(callback, dish=get_cur_dish(data))
+            await FindDishState.show_instruction.set()
         elif callback.data == 'stop':
             await to_start(callback)
             await state.reset_state(with_data=False)
 
         if callback.data in navigation_btns:
             await update_dish_message(callback, dish=get_cur_dish(data))
-            await callback.answer()
+
+        await callback.answer()
 
 
 def run():
