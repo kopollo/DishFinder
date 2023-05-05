@@ -29,6 +29,7 @@ class StartKeyboard:
     start_kb.add(find_dish_btn, history_btn)
 
     def __new__(cls):
+        """Return keyboard if calling class."""
         return cls.start_kb
 
 
@@ -61,11 +62,12 @@ class ChooseDishKeyboard:
     choose_kb.add(prev_btn, more_btn, next_btn, stop_btn)
 
     def __new__(cls):
+        """Return keyboard if calling class."""
         return cls.choose_kb
 
 
 class ShowInstructionKeyboard:
-    """keyboard for more_info state."""
+    """Keyboard for show_instruction state."""
 
     kb = InlineKeyboardMarkup()
     save_btn = InlineKeyboardButton(
@@ -75,6 +77,7 @@ class ShowInstructionKeyboard:
     kb.add(back_btn, save_btn)
 
     def __new__(cls):
+        """Return keyboard if calling class."""
         return cls.kb
 
 
@@ -102,10 +105,13 @@ class HistoryKeyboard:
         return history_kb
 
     def __new__(cls, dishes: list[DishModel]) -> InlineKeyboardMarkup:
+        """Return keyboard if calling class."""
         return cls._generate_kb(dishes)
 
 
 class HistoryDishInfoKeyboard:
+    """Keyboard for show_history_dish state."""
+
     kb = InlineKeyboardMarkup()
     save_btn = InlineKeyboardButton(
         text='show instruction',
@@ -114,19 +120,16 @@ class HistoryDishInfoKeyboard:
     kb.add(back_btn, save_btn)
 
     def __new__(cls):
+        """Return keyboard if calling class."""
         return cls.kb
 
 
 class HistoryDishInstructionKeyboard:
-    """Keyboard to hide dishes info msg's for history state."""
+    """Keyboard for show dish instruction state."""
+
     kb = InlineKeyboardMarkup()
     kb.add(back_btn)
 
     def __new__(cls):
+        """Return keyboard if calling class."""
         return cls.kb
-
-# start_kb = StartKeyboard.start_kb
-# choose_kb = ChooseDishKeyboard.choose_kb
-# more_kb = MoreInfoKeyboard.more_kb
-# history_dish_info_kb = HistoryDishInfoKeyboard.dish_info_kb
-# history_dish_instruction_kb = HistoryDishInstructionKeyboard.kb

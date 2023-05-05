@@ -108,6 +108,7 @@ async def init_fsm_proxy(state: FSMContext, to_store: dict):
 
 
 def get_dishes_to_history(user_id: int) -> list[DishModel]:
+    """Get last 10 dishes from db_manager."""
     dishes = filter_dishes(
         db_manager.get_all_user_dishes(user_id)
     )
@@ -115,10 +116,12 @@ def get_dishes_to_history(user_id: int) -> list[DishModel]:
 
 
 async def save_history_dish_in_proxy(dish: DishModel, state: FSMContext):
+    """Save chose dish from history to proxy."""
     async with state.proxy() as data:
         data['history_dish'] = dish
 
 
-async def extract_history_dish(state: FSMContext) -> DishModel:
+async def get_proxy_history_dish(state: FSMContext) -> DishModel:
+    """Get saved dish in proxy."""
     async with state.proxy() as data:
         return data['history_dish']

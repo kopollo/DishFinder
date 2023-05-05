@@ -10,7 +10,7 @@ from .markup import HistoryKeyboard, HistoryDishInstructionKeyboard, \
     ShowInstructionKeyboard
 from .setup import bot, db_manager
 from .utils import get_cur_dish, format_dishes_for_message, filter_dishes, \
-    get_dishes_to_history
+    get_dishes_to_history, from_dish_api_repr
 from db import DishModel
 
 
@@ -72,25 +72,24 @@ async def send_cur_dish_info(data: FSMContextProxy):
     :param data: context manager storage
     :return:
     """
-    dish = get_cur_dish(data)
-    caption = dish.title + '\n' + '\n' + dish.ingredients
+    dish = from_dish_api_repr(get_cur_dish(data))
     await bot.send_photo(
         chat_id=data['chat_id'],
         reply_markup=ChooseDishKeyboard(),
         photo=dish.image_url,
-        caption=caption,
+        caption=dish.preview(),
     )
 
 
 async def send_history_dish_info(callback: types.CallbackQuery,
                                  dish: DishModel) -> None:
-    caption = dish.title + '\n' + '\n' + dish.ingredients
+    """Send info about dish in history - dish title, ingredients, photo."""
     await callback.message.delete()
     await bot.send_photo(
         chat_id=callback.from_user.id,
         reply_markup=HistoryDishInfoKeyboard(),
         photo=dish.image_url,
-        caption=caption,
+        caption=dish.preview(),
     )
 
 
@@ -110,22 +109,23 @@ async def send_dish_instruction(callback: types.CallbackQuery,
 
 
 async def send_history_widget(user_id: int, state: FSMContext):
+    """Send widget with dishes."""
     dishes = get_dishes_to_history(user_id)
-
     # TODO abort_if_empty_storage except (except statement) much prettier.
-    try:
+    if not len(dishes):
+        await send_sorry_msg(user_id)
+        await state.reset_state(with_data=False)
+    else:
         await bot.send_message(
             chat_id=user_id,
             text=format_dishes_for_message(dishes),
             reply_markup=HistoryKeyboard(dishes),
         )
-    except aiogram.utils.exceptions.MessageTextIsEmpty:
-        await send_sorry_msg(user_id)
-        await state.reset_state(with_data=False)
 
 
 async def show_instruction_in_history(callback: types.CallbackQuery,
                                       dish: DishApiRepr):
+    """Send message with dish instruction."""
     await callback.message.answer(
         text=dish.instruction,
         reply_markup=HistoryDishInstructionKeyboard(),

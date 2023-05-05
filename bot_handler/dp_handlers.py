@@ -122,13 +122,20 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query_handler(state=FindDishState.show_history_dish)
 async def show_dish_in_history(callback: types.CallbackQuery,
                                state: FSMContext):
+    """
+    Handle callback data in HistoryDishInfoKeyboard.
+
+    :param callback: callback info from pressed btn
+    :param state: position in the final state machine
+    :return: None
+    """
     if callback.data == 'back':
         await FindDishState.history.set()
         await callback.message.delete()
         await send_history_widget(user_id=callback.from_user.id, state=state)
 
     elif callback.data == 'show_instruction':
-        dish = await extract_history_dish(state)
+        dish = await get_proxy_history_dish(state)
         await FindDishState.history_show_instruction.set()
         await callback.message.delete()
         await show_instruction_in_history(callback=callback, dish=dish)
@@ -139,8 +146,15 @@ async def show_dish_in_history(callback: types.CallbackQuery,
 @dp.callback_query_handler(state=FindDishState.history_show_instruction)
 async def show_dish_instruction_in_history(callback: types.CallbackQuery,
                                            state: FSMContext):
+    """
+    Handle callback data in HistoryDishInstructionKeyboard.
+
+    :param callback: callback info from pressed btn
+    :param state: position in the final state machine
+    :return: None
+    """
     if callback.data == 'back':
-        dish = await extract_history_dish(state)
+        dish = await get_proxy_history_dish(state)
         await FindDishState.show_history_dish.set()
         await send_history_dish_info(dish=dish, callback=callback)
 
