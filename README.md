@@ -1,6 +1,6 @@
 # DishFinder
 
-Telegram bot that helps you to find idea for dish - just enter ingredients and choose your favorite dish.
+Telegram bot that helps you find idea for dish - just enter ingredients and choose your favorite dish.
 ## Features
 
 - Output of detailed information
@@ -28,7 +28,7 @@ The project has been checked and tested with the following tools:
 - [ ] Translation in russian and english
 - [ ] Asynchronous API Calls
 - [ ] Change DB on Postgres
-- [ ] Ability to view the full recipe through history
+- [X] Ability to view the full recipe through history
 
 ## How to start
 
@@ -40,7 +40,8 @@ The project has been checked and tested with the following tools:
 ## Design
 
 ### State diagram 
-![image](https://user-images.githubusercontent.com/114457052/234188089-2513addb-dfef-42d9-9e76-05d82365b096.png)
+![image](https://user-images.githubusercontent.com/114457052/236517303-dd02980a-8d4c-4054-b493-38e1553991e0.png)
+
 ### Sequence diagram 
 ![image](https://user-images.githubusercontent.com/114457052/234188130-1be8a3c9-6520-47f7-941c-8012c794d22e.png)
 
