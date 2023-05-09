@@ -32,11 +32,8 @@ async def check_history_cmd(message: types.Message, state: FSMContext):
     :param state: position in the final state machine
     :return: None
     """
-    # await send_text_msg(chat_id=get_chat_id(message), text=ENTER, )
     await FindDishState.history.set()
-    # user_id = get_chat_id(message)
-    # dishes = get_user_dishes(user_id)
-    await send_history_widget(update=message, state=state)
+    await send_history_widget(message)
 
 
 @dp.message_handler(commands=['start'], state='*')
@@ -51,7 +48,6 @@ async def init_dialog_cmd(message: types.Message, state: FSMContext):
     await state.reset_state(with_data=False)
     await send_text_msg(update=message, text=START,
                         keyboard=StartKeyboard())
-    # await send_welcome_msg(chat_id=message.from_user.id)
 
 
 @dp.message_handler(state=FindDishState.enter_ingredients)
@@ -87,9 +83,9 @@ async def show_instruction_in_search_callback(callback: types.CallbackQuery,
     :return: None
     """
     if callback.data == 'back':
-        await callback.message.delete()
         await send_cur_dish_info(callback)
         await FindDishState.show_dishes.set()
+        await callback.message.delete()
         await callback.answer('back')
 
     elif callback.data == 'save':
@@ -112,19 +108,16 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
     more_info_prefix = 'dish_'
     if callback.data == 'back':
         await to_start(callback)
-        await state.reset_state(with_data=False)
+        await callback.message.delete()
 
     elif callback.data.startswith(more_info_prefix):
         dish_id = int(callback.data.removeprefix(more_info_prefix))
         dish: DishModel = db_manager.get_dish(dish_id)
+
         await save_history_dish_in_proxy(dish=dish, state=state)
-
         await FindDishState.show_history_dish.set()
-
-        await callback.message.delete()
-
         await send_history_dish_info(callback)
-
+        await callback.message.delete()
     await callback.answer()
 
 
@@ -141,7 +134,7 @@ async def show_dish_in_history(callback: types.CallbackQuery,
     if callback.data == 'back':
         await FindDishState.history.set()
         await callback.message.delete()
-        await send_history_widget(update=callback, state=state)
+        await send_history_widget(callback)
 
     elif callback.data == 'show_instruction':
         dish = await get_proxy_history_dish(state)
@@ -152,7 +145,6 @@ async def show_dish_in_history(callback: types.CallbackQuery,
             text=dish.instruction,
             keyboard=HistoryDishInstructionKeyboard(),
         )
-        # await show_instruction_in_history(callback=callback, dish=dish)
 
     await callback.answer()
 

@@ -12,6 +12,7 @@ from .markup import StartKeyboard
 
 from food_api_handler.food_searcher import DishApiRepr
 from .setup import db_manager, bot, dp
+from msg_templates import START
 
 
 def get_cur_dish(data: FSMContextProxy) -> DishModel:
@@ -67,21 +68,19 @@ def from_dish_api_repr(dish: DishApiRepr) -> DishModel:
     return dish_model
 
 
-async def to_start(callback: types.CallbackQuery):
+async def to_start(callback: types.CallbackQuery, state: FSMContext):
     """
     Relocate user to start state.
 
     :param callback: callback info from pressed btn
     :return:
     """
-    text = """welcome back"""
-    await callback.message.answer(text=text, reply_markup=StartKeyboard())
-    await callback.message.delete()
-    await callback.answer()
+    await state.reset_state(with_data=False)
+    await callback.message.answer(text=START, reply_markup=StartKeyboard())
 
 
 def filter_dishes(dishes: list[DishModel]) -> list[DishModel]:
-    """Bound dishes to show user by 10."""
+    """limit the number of dishes shown to the user to 10."""
     return dishes[:10]
 
 

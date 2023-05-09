@@ -45,7 +45,7 @@ from db import DishModel
 #     )
 
 
-async def update_dish_message(callback: types.CallbackQuery, dish: DishApiRepr):
+async def update_dish_message(callback: types.CallbackQuery, dish: DishModel):
     """
     Update dish message to implement pagination.
 
@@ -53,9 +53,8 @@ async def update_dish_message(callback: types.CallbackQuery, dish: DishApiRepr):
     :param dish: DishApiRepr object
     :return: None
     """
-    caption = dish.title + '\n' + '\n' + dish.ingredients
     photo = types.InputMediaPhoto(media=dish.image_url,
-                                  caption=caption)
+                                  caption=dish.preview())
     try:
         await bot.edit_message_media(
             chat_id=callback.from_user.id,
@@ -64,7 +63,7 @@ async def update_dish_message(callback: types.CallbackQuery, dish: DishApiRepr):
             reply_markup=ChooseDishKeyboard(),
         )
     except MessageNotModified:
-        print('same as before')
+        pass
 
 
 async def send_history_dish_info(callback: types.CallbackQuery) -> None:
@@ -90,38 +89,16 @@ async def send_cur_dish_info(
     )
 
 
-# async def send_dish_instruction(callback: types.CallbackQuery,
-#                                 dish: DishApiRepr):
-#     """
-#     Send message with dish ingredients.
-#
-#     :param callback: callback info from pressed btn
-#     :param dish: DishApiRepr
-#     :return: None
-#     """
-#     await callback.message.answer(
-#         text=dish.instruction,
-#         reply_markup=ShowInstructionKeyboard(),
-#     )
-
-
-async def send_history_widget(update: Union[types.Message, types.CallbackQuery],
-                              state: FSMContext):
-    """Send widget with dishes."""
+async def send_history_widget(
+        update: Union[types.Message, types.CallbackQuery]):
+    """Send widget with dishes in history."""
     dishes = get_user_dishes(get_chat_id(update))
     # TODO abort_if_empty_storage except (except statement) much prettier.
     if not len(dishes):
-        # await send_sorry_msg(user_id)
+        state = get_cur_state(get_chat_id(update))
         await state.reset_state(with_data=False)
     else:
-        await send_text_msg(update=update,
-                            text=format_dishes_for_message(dishes),
-                            keyboard=HistoryKeyboard(dishes), )
-
-# async def show_instruction_in_history(callback: types.CallbackQuery,
-#                                       dish: DishApiRepr):
-#     """Send message with dish instruction."""
-#     await callback.message.answer(
-#         text=dish.instruction,
-#         reply_markup=HistoryDishInstructionKeyboard(),
-#     )
+        await send_text_msg(
+            update=update,
+            text=format_dishes_for_message(dishes),
+            keyboard=HistoryKeyboard(dishes), )
