@@ -45,9 +45,7 @@ async def init_dialog_cmd(message: types.Message, state: FSMContext):
     :param state: position in the final state machine
     :return: None
     """
-    await state.reset_state(with_data=False)
-    await send_text_msg(update=message, text=START,
-                        keyboard=StartKeyboard())
+    await to_start(message, state)
 
 
 @dp.message_handler(state=FindDishState.enter_ingredients)
@@ -68,8 +66,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
             await FindDishState.show_dishes.set()
             await send_cur_dish_info(message)
     except IndexError:
-        # await send_sorry_msg(message.from_user.id)
-        await state.reset_state(with_data=False)
+        await to_start(message, state)
 
 
 @dp.callback_query_handler(state=FindDishState.show_instruction)
@@ -107,7 +104,7 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
     """
     more_info_prefix = 'dish_'
     if callback.data == 'back':
-        await to_start(callback)
+        await to_start(callback, state)
         await callback.message.delete()
 
     elif callback.data.startswith(more_info_prefix):
@@ -188,8 +185,7 @@ async def dish_list_in_search_callback(
                 keyboard=ShowInstructionKeyboard())
 
         elif callback.data == 'stop':
-            await to_start(callback)
-            await state.reset_state(with_data=False)
+            await to_start(callback, state)
 
         if callback.data in navigation_btns:
             await update_dish_message(callback, dish=get_cur_dish(data))

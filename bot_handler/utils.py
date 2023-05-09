@@ -68,15 +68,14 @@ def from_dish_api_repr(dish: DishApiRepr) -> DishModel:
     return dish_model
 
 
-async def to_start(callback: types.CallbackQuery, state: FSMContext):
-    """
-    Relocate user to start state.
-
-    :param callback: callback info from pressed btn
-    :return:
-    """
+async def to_start(update: Union[types.Message, types.CallbackQuery],
+                   state: FSMContext):
     await state.reset_state(with_data=False)
-    await callback.message.answer(text=START, reply_markup=StartKeyboard())
+    await send_text_msg(
+        update=update,
+        text=START,
+        keyboard=StartKeyboard(),
+    )
 
 
 def filter_dishes(dishes: list[DishModel]) -> list[DishModel]:

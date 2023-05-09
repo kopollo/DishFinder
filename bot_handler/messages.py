@@ -14,35 +14,8 @@ from .setup import bot, db_manager
 from .utils import get_cur_dish, format_dishes_for_message, filter_dishes, \
     get_user_dishes, from_dish_api_repr, send_text_msg, get_chat_id, \
     get_proxy_history_dish, get_cur_state, \
-    send_msg_with_dish
+    send_msg_with_dish, to_start
 from db import DishModel
-
-
-# async def send_welcome_msg(chat_id):
-#     """
-#     Send welcome msg.
-#
-#     :param chat_id: chat id where to send a message
-#     :return: None
-#     """
-#     await bot.send_message(
-#         chat_id=chat_id,
-#         text='HI HI HI HI',
-#         reply_markup=StartKeyboard(),
-#     )
-#
-# async def send_sorry_msg(chat_id):
-#     """
-#     Send sorry msg.
-#
-#     :param chat_id: chat id where to send a message
-#     :return: None
-#     """
-#     await bot.send_message(
-#         chat_id=chat_id,
-#         text="I'm sorry but I haven't find anything",
-#         reply_markup=StartKeyboard(),
-#     )
 
 
 async def update_dish_message(callback: types.CallbackQuery, dish: DishModel):
@@ -96,7 +69,7 @@ async def send_history_widget(
     # TODO abort_if_empty_storage except (except statement) much prettier.
     if not len(dishes):
         state = get_cur_state(get_chat_id(update))
-        await state.reset_state(with_data=False)
+        await to_start(update, state)
     else:
         await send_text_msg(
             update=update,
