@@ -1,23 +1,27 @@
 """Contain utils for bot handlers."""
+from typing import Union
+
 from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
 from dataclasses import asdict
+
+from aiogram.types import Update
 
 from db import DishModel, UserModel
 from .markup import StartKeyboard
 
 from food_api_handler.food_searcher import DishApiRepr
-from .setup import db_manager
+from .setup import db_manager, bot, dp
 
 
-def get_cur_dish(data: FSMContextProxy) -> DishApiRepr:
+def get_cur_dish(data: FSMContextProxy) -> DishModel:
     """
     Extract dish from context manager.
 
     :param data: context manager storage
     :return: DishApiRepr
     """
-    return data['dishes'][data['cur_dish_id']]
+    return from_dish_api_repr(data['dishes'][data['cur_dish_id']])
 
 
 def get_cur_user(data: FSMContextProxy) -> UserModel:
@@ -107,7 +111,7 @@ async def init_fsm_proxy(state: FSMContext, to_store: dict):
             data[key] = value
 
 
-def get_dishes_to_history(user_id: int) -> list[DishModel]:
+def get_user_dishes(user_id: int) -> list[DishModel]:
     """Get last 10 dishes from db_manager."""
     dishes = filter_dishes(
         db_manager.get_all_user_dishes(user_id)
@@ -125,3 +129,34 @@ async def get_proxy_history_dish(state: FSMContext) -> DishModel:
     """Get saved dish in proxy."""
     async with state.proxy() as data:
         return data['history_dish']
+
+
+def get_chat_id(update: Union[types.Message, types.CallbackQuery]):
+    return update.from_user.id
+
+
+def get_cur_state(chat_id: int) -> FSMContext:
+    state = dp.current_state(chat=chat_id, user=chat_id)
+    return state
+
+
+async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
+                        text: str,
+                        keyboard=None) -> None:
+    await bot.send_message(
+        chat_id=get_chat_id(update),
+        text=text,
+        reply_markup=keyboard,
+    )
+
+
+async def send_msg_with_dish(
+        update: Union[types.Message, types.CallbackQuery],
+        dish: DishModel,
+        keyboard=None) -> None:
+    await bot.send_photo(
+        chat_id=get_chat_id(update),
+        reply_markup=keyboard,
+        photo=dish.image_url,
+        caption=dish.preview(),
+    )
