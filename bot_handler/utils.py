@@ -12,7 +12,7 @@ from .markup import StartKeyboard
 
 from food_api_handler.food_searcher import DishApiRepr
 from .setup import db_manager, bot, dp
-from msg_templates import START
+from .msg_templates import START
 
 
 def get_cur_dish(data: FSMContextProxy) -> DishModel:

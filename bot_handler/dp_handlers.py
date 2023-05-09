@@ -63,8 +63,8 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             data['dishes'] = dishes
             data['cur_dish_id'] = 0
-            await FindDishState.show_dishes.set()
-            await send_cur_dish_info(message)
+        await FindDishState.show_dishes.set()
+        await send_cur_dish_info(message)
     except IndexError:
         await to_start(message, state)
 
@@ -87,9 +87,9 @@ async def show_instruction_in_search_callback(callback: types.CallbackQuery,
 
     elif callback.data == 'save':
         async with state.proxy() as data:
-            dish = get_cur_dish(data)
+            dish: DishModel = get_cur_dish(data)
             user = get_cur_user(data)
-            db_manager.save_dish_event(from_dish_api_repr(dish), user)
+            db_manager.save_dish_event(dish, user)
             await callback.answer('SAVED!')
 
 

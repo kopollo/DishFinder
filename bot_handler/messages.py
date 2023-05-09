@@ -54,12 +54,13 @@ async def send_history_dish_info(callback: types.CallbackQuery) -> None:
 async def send_cur_dish_info(
         update: Union[types.Message, types.CallbackQuery]) -> None:
     state = get_cur_state(get_chat_id(update))
-    dish = (get_cur_dish(state.proxy()))
-    await send_msg_with_dish(
-        update=update,
-        keyboard=ChooseDishKeyboard(),
-        dish=dish
-    )
+    async with state.proxy() as data:
+        dish = get_cur_dish(data)
+        await send_msg_with_dish(
+            update=update,
+            keyboard=ChooseDishKeyboard(),
+            dish=dish
+        )
 
 
 async def send_history_widget(
