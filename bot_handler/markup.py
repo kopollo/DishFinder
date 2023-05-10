@@ -15,6 +15,7 @@ class FindDishState(StatesGroup):
     history = State()
     show_history_dish = State()
     history_show_instruction = State()
+    settings = State()
 
 
 class StartKeyboard:
@@ -22,11 +23,10 @@ class StartKeyboard:
 
     start_kb = ReplyKeyboardMarkup(resize_keyboard=True,
                                    one_time_keyboard=True)
-    find_dish_btn = KeyboardButton(
-        text='/find_dish',
-    )
+    find_dish_btn = KeyboardButton('/find_dish', )
     history_btn = KeyboardButton('/history')
-    start_kb.add(find_dish_btn, history_btn)
+    settings_btn = KeyboardButton('/settings')
+    start_kb.add(find_dish_btn, history_btn, settings_btn)
 
     def __new__(cls):
         """Return keyboard if calling class."""
@@ -129,6 +129,26 @@ class HistoryDishInstructionKeyboard:
 
     kb = InlineKeyboardMarkup()
     kb.add(back_btn)
+
+    def __new__(cls):
+        """Return keyboard if calling class."""
+        return cls.kb
+
+
+class SettingsKeyboard:
+    """Keyboard for settings state."""
+
+    kb = InlineKeyboardMarkup(row_width=1)
+
+    eng = InlineKeyboardButton(
+        text='eng',
+        callback_data='eng',
+    )
+    ru = InlineKeyboardButton(
+        text='ru',
+        callback_data='ru',
+    )
+    kb.add(eng, ru, back_btn)
 
     def __new__(cls):
         """Return keyboard if calling class."""

@@ -139,12 +139,6 @@ def get_cur_state(chat_id: int) -> FSMContext:
     return state
 
 
-def abort_if_not_dishes(update: Union[types.Message, types.CallbackQuery],
-                        dishes: list) -> None:
-    if not len(dishes):
-        await to_start(update=update, text=SORRY)
-
-
 async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
                         text: str,
                         keyboard=None) -> None:

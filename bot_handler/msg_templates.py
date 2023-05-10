@@ -7,3 +7,5 @@ SORRY = """
 "I'm sorry but I haven't find anything"
 """
 ENTER = """Enter your ingredients split by ',' """
+
+SETTINGS = """You can choose language interface here"""

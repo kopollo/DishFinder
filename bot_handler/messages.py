@@ -8,14 +8,16 @@ from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 
 from food_api_handler.food_searcher import DishApiRepr
 from .markup import HistoryKeyboard, HistoryDishInstructionKeyboard, \
-    StartKeyboard, HistoryDishInfoKeyboard, ChooseDishKeyboard, \
-    ShowInstructionKeyboard
+    StartKeyboard, HistoryDishInfoKeyboard, ChooseDishKeyboard
 from .setup import bot, db_manager
-from .utils import get_cur_dish, format_dishes_for_message, filter_dishes, \
-    get_user_dishes, from_dish_api_repr, send_text_msg, get_chat_id, \
-    get_proxy_history_dish, get_cur_state, \
-    send_msg_with_dish, to_start, abort_if_not_dishes
-from .msg_templates import SORRY
+from .utils import (
+    get_cur_dish, format_dishes_for_message, filter_dishes,
+    get_user_dishes, from_dish_api_repr, send_text_msg,
+    get_chat_id,
+    get_proxy_history_dish, get_cur_state,
+    send_msg_with_dish, to_start,
+)
+from .msg_templates import *
 from db import DishModel
 
 
@@ -68,7 +70,9 @@ async def send_history_widget(
         update: Union[types.Message, types.CallbackQuery]):
     """Send widget with dishes in history."""
     dishes = get_user_dishes(get_chat_id(update))
-    abort_if_not_dishes(update=update, dishes=dishes)
+    if not dishes:
+        await to_start(update=update, text=SORRY)
+        return None
     await send_text_msg(
         update=update,
         text=format_dishes_for_message(dishes),

@@ -1,13 +1,16 @@
 """Contain message and callback handlers."""
 from aiogram.utils import executor
 
-from .markup import FindDishState, ShowInstructionInSearchKeyboard
+from .markup import (
+    FindDishState, ShowInstructionInSearchKeyboard,
+    SettingsKeyboard,
+)
 from .middleware import CheckUserMiddleware
 from .setup import *
 from .utils import *
 from .messages import *
 from food_api_handler.food_searcher import FoodApiManager
-from .msg_templates import START, ENTER, SORRY
+from .msg_templates import *
 
 
 @dp.message_handler(commands=['find_dish'], state='*')
@@ -48,6 +51,16 @@ async def init_dialog_cmd(message: types.Message, state: FSMContext):
     await to_start(update=message, text=START)
 
 
+@dp.message_handler(commands=['settings'], state='*')
+async def settings_cmd(message: types.Message):
+    await FindDishState.settings.set()
+    await send_text_msg(
+        update=message,
+        text=SETTINGS,
+        keyboard=SettingsKeyboard(),
+    )
+
+
 @dp.message_handler(state=FindDishState.enter_ingredients)
 async def enter_ingredients(message: types.Message, state: FSMContext):
     """
@@ -59,7 +72,9 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     """
     ingredients = message.text
     dishes = FoodApiManager(ingredients).get_dishes()
-    abort_if_not_dishes(update=message, dishes=dishes)
+    if not dishes:
+        await to_start(update=message, text=SORRY)
+        return None
     async with state.proxy() as data:
         data['dishes'] = dishes
         data['cur_dish_id'] = 0
@@ -188,6 +203,19 @@ async def dish_list_in_search_callback(
         if callback.data in navigation_btns:
             await update_dish_message(callback, dish=get_cur_dish(data))
         await callback.answer()
+
+
+@dp.callback_query_handler(state=FindDishState.settings)
+async def settings_callback(
+        callback: types.CallbackQuery, state: FSMContext):
+    if callback.data == 'eng':
+        pass
+    elif callback.data == 'ru':
+        pass
+    elif callback.data == 'back':
+        pass
+    await callback.message.delete()
+    await to_start(update=callback, text=START)
 
 
 def run():
