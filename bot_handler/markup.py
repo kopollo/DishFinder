@@ -138,7 +138,7 @@ class HistoryDishInstructionKeyboard:
 class SettingsKeyboard:
     """Keyboard for settings state."""
 
-    kb = InlineKeyboardMarkup(row_width=1)
+    kb = InlineKeyboardMarkup(row_width=2)
 
     eng = InlineKeyboardButton(
         text='eng',

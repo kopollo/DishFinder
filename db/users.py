@@ -19,3 +19,6 @@ class UserModel(SqlAlchemyBase):
         sqlalchemy.DateTime,
         default=datetime.datetime.now,
     )
+    first_name = sqlalchemy.Column(sqlalchemy.String)
+    last_name = sqlalchemy.Column(sqlalchemy.String)
+    language = sqlalchemy.Column(sqlalchemy.String, default="en")

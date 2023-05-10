@@ -159,3 +159,13 @@ async def send_msg_with_dish(
         photo=dish.image_url,
         caption=dish.preview(),
     )
+
+
+def init_user_model(
+        update: Union[types.Message, types.CallbackQuery]) -> UserModel:
+    user = UserModel(
+        first_name=update.from_user.first_name,
+        last_name=update.from_user.last_name,
+        tg_id=update.from_user.id,
+    )
+    return user
