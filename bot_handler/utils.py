@@ -12,7 +12,7 @@ from .markup import StartKeyboard
 
 from food_api_handler.food_searcher import DishApiRepr
 from .setup import db_manager, bot, dp
-from .msg_templates import START
+from .msg_templates import START, SORRY
 
 
 def get_cur_dish(data: FSMContextProxy) -> DishModel:
@@ -69,11 +69,12 @@ def from_dish_api_repr(dish: DishApiRepr) -> DishModel:
 
 
 async def to_start(update: Union[types.Message, types.CallbackQuery],
-                   state: FSMContext):
+                   text: str):
+    state = get_cur_state(get_chat_id(update))
     await state.reset_state(with_data=False)
     await send_text_msg(
         update=update,
-        text=START,
+        text=text,
         keyboard=StartKeyboard(),
     )
 
@@ -136,6 +137,12 @@ def get_chat_id(update: Union[types.Message, types.CallbackQuery]):
 def get_cur_state(chat_id: int) -> FSMContext:
     state = dp.current_state(chat=chat_id, user=chat_id)
     return state
+
+
+def abort_if_not_dishes(update: Union[types.Message, types.CallbackQuery],
+                        dishes: list) -> None:
+    if not len(dishes):
+        await to_start(update=update, text=SORRY)
 
 
 async def send_text_msg(update: Union[types.Message, types.CallbackQuery],

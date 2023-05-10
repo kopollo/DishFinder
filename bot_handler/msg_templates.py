@@ -6,6 +6,4 @@ HI HI HI HI
 SORRY = """
 "I'm sorry but I haven't find anything"
 """
-ENTER = """
-Enter your ingredients split by ',' 
-"""
+ENTER = """Enter your ingredients split by ',' """

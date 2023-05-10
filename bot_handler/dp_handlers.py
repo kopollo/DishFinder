@@ -1,7 +1,7 @@
 """Contain message and callback handlers."""
 from aiogram.utils import executor
 
-from .markup import FindDishState
+from .markup import FindDishState, ShowInstructionInSearchKeyboard
 from .middleware import CheckUserMiddleware
 from .setup import *
 from .utils import *
@@ -45,7 +45,7 @@ async def init_dialog_cmd(message: types.Message, state: FSMContext):
     :param state: position in the final state machine
     :return: None
     """
-    await to_start(message, state)
+    await to_start(update=message, text=START)
 
 
 @dp.message_handler(state=FindDishState.enter_ingredients)
@@ -59,14 +59,12 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     """
     ingredients = message.text
     dishes = FoodApiManager(ingredients).get_dishes()
-    try:
-        async with state.proxy() as data:
-            data['dishes'] = dishes
-            data['cur_dish_id'] = 0
-        await FindDishState.show_dishes.set()
-        await send_cur_dish_info(message)
-    except IndexError:
-        await to_start(message, state)
+    abort_if_not_dishes(update=message, dishes=dishes)
+    async with state.proxy() as data:
+        data['dishes'] = dishes
+        data['cur_dish_id'] = 0
+    await FindDishState.show_dishes.set()
+    await send_cur_dish_info(message)
 
 
 @dp.callback_query_handler(state=FindDishState.show_instruction)
@@ -104,7 +102,7 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
     """
     more_info_prefix = 'dish_'
     if callback.data == 'back':
-        await to_start(callback, state)
+        await to_start(update=callback, text=START)
         await callback.message.delete()
 
     elif callback.data.startswith(more_info_prefix):
@@ -182,10 +180,10 @@ async def dish_list_in_search_callback(
             await send_text_msg(
                 update=callback,
                 text=get_cur_dish(data).instruction,
-                keyboard=ShowInstructionKeyboard())
+                keyboard=ShowInstructionInSearchKeyboard())
 
         elif callback.data == 'stop':
-            await to_start(callback, state)
+            await to_start(update=callback, text=START)
 
         if callback.data in navigation_btns:
             await update_dish_message(callback, dish=get_cur_dish(data))

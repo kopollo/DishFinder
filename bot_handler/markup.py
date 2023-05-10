@@ -66,7 +66,7 @@ class ChooseDishKeyboard:
         return cls.choose_kb
 
 
-class ShowInstructionKeyboard:
+class ShowInstructionInSearchKeyboard:
     """Keyboard for show_instruction state."""
 
     kb = InlineKeyboardMarkup()

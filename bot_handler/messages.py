@@ -14,7 +14,8 @@ from .setup import bot, db_manager
 from .utils import get_cur_dish, format_dishes_for_message, filter_dishes, \
     get_user_dishes, from_dish_api_repr, send_text_msg, get_chat_id, \
     get_proxy_history_dish, get_cur_state, \
-    send_msg_with_dish, to_start
+    send_msg_with_dish, to_start, abort_if_not_dishes
+from .msg_templates import SORRY
 from db import DishModel
 
 
@@ -67,12 +68,8 @@ async def send_history_widget(
         update: Union[types.Message, types.CallbackQuery]):
     """Send widget with dishes in history."""
     dishes = get_user_dishes(get_chat_id(update))
-    # TODO abort_if_empty_storage except (except statement) much prettier.
-    if not len(dishes):
-        state = get_cur_state(get_chat_id(update))
-        await to_start(update, state)
-    else:
-        await send_text_msg(
-            update=update,
-            text=format_dishes_for_message(dishes),
-            keyboard=HistoryKeyboard(dishes), )
+    abort_if_not_dishes(update=update, dishes=dishes)
+    await send_text_msg(
+        update=update,
+        text=format_dishes_for_message(dishes),
+        keyboard=HistoryKeyboard(dishes), )
