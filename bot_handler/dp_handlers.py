@@ -1,16 +1,15 @@
 """Contain message and callback handlers."""
 from aiogram.utils import executor
 
-from .markup import (
-    FindDishState, ShowInstructionInSearchKeyboard,
-    SettingsKeyboard,
-)
+from .context_filter import DBFilter
+from .markup import FindDishState
 from .middleware import CheckUserMiddleware
 from .setup import *
 from .utils import *
 from .messages import *
 from food_api_handler.food_searcher import FoodApiManager
 from .msg_templates import *
+from .keboards import *
 
 
 @dp.message_handler(commands=['find_dish'], state='*')
@@ -61,6 +60,12 @@ async def settings_cmd(message: types.Message):
     )
 
 
+def __from_api_to_norm_test(dish):
+    #  DELETE TOMORROW
+    dish_repr = DishInBotRepr(**asdict(dish))
+    return dish_repr
+
+
 @dp.message_handler(state=FindDishState.enter_ingredients)
 async def enter_ingredients(message: types.Message, state: FSMContext):
     """
@@ -70,8 +75,12 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     :param state: position in the final state machine
     :return: None
     """
-    ingredients = message.text
-    dishes = FoodApiManager(ingredients).get_dishes()
+    ingredients: str = message.text
+    dishes_api = FoodApiManager(ingredients).get_dishes()
+    dishes = [__from_api_to_norm_test(dish) for dish in dishes_api]
+    # dishes: DishInBotRepr = __from_api_to_norm_test(
+    #     dish_api
+    # )
     if not dishes:
         await to_start(update=message, text=SORRY)
         return None
@@ -100,9 +109,9 @@ async def show_instruction_in_search_callback(callback: types.CallbackQuery,
 
     elif callback.data == 'save':
         async with state.proxy() as data:
-            dish: DishModel = get_cur_dish(data)
-            user = get_cur_user(data)
-            db_manager.save_dish_event(dish, user)
+            dish: DishInBotRepr = get_cur_dish(data)
+            user: UserModel = get_cur_user(data)
+            db_filter.save_dish(dish, user)  # TODO refactor args
             await callback.answer('SAVED!')
 
 
@@ -122,8 +131,7 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
 
     elif callback.data.startswith(more_info_prefix):
         dish_id = int(callback.data.removeprefix(more_info_prefix))
-        dish: DishModel = db_manager.get_dish(dish_id)
-
+        dish: DishInBotRepr = db_filter.get_dish(dish_id)
         await save_history_dish_in_proxy(dish=dish, state=state)
         await FindDishState.show_history_dish.set()
         await send_history_dish_info(callback)

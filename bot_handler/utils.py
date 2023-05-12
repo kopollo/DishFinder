@@ -7,22 +7,22 @@ from dataclasses import asdict
 
 from aiogram.types import Update
 
-from db import DishModel, UserModel
-from .markup import StartKeyboard
-
-from food_api_handler.food_searcher import DishApiRepr
-from .setup import db_manager, bot, dp
+from db import UserModel
+from .keboards import StartKeyboard
+from .markup import DishInBotRepr
+# from food_api_handler.food_searcher import DishApiRepr
+from .setup import db_filter, bot, dp
 from .msg_templates import START, SORRY
 
 
-def get_cur_dish(data: FSMContextProxy) -> DishModel:
+def get_cur_dish(data: FSMContextProxy) -> DishInBotRepr:
     """
     Extract dish from context manager.
 
     :param data: context manager storage
     :return: DishApiRepr
     """
-    return from_dish_api_repr(data['dishes'][data['cur_dish_id']])
+    return data['dishes'][data['cur_dish_id']]
 
 
 def get_cur_user(data: FSMContextProxy) -> UserModel:
@@ -57,17 +57,6 @@ def prev_dish(data: FSMContextProxy):
     data['cur_dish_id'] = max(cur_dish_id - 1, 0)
 
 
-def from_dish_api_repr(dish: DishApiRepr) -> DishModel:
-    """
-    Transfer DishApiRepr to DishModel.
-
-    :param dish: DishApiRepr
-    :return: DishModel
-    """
-    dish_model = DishModel(**asdict(dish))
-    return dish_model
-
-
 async def to_start(update: Union[types.Message, types.CallbackQuery],
                    text: str):
     state = get_cur_state(get_chat_id(update))
@@ -79,12 +68,12 @@ async def to_start(update: Union[types.Message, types.CallbackQuery],
     )
 
 
-def filter_dishes(dishes: list[DishModel]) -> list[DishModel]:
+def filter_dishes(dishes: list[DishInBotRepr]) -> list[DishInBotRepr]:
     """limit the number of dishes shown to the user to 10."""
     return dishes[:10]
 
 
-def format_dishes_for_message(dishes: list[DishModel]) -> str:
+def format_dishes_for_message(dishes: list[DishInBotRepr]) -> str:
     """
     Format dishes for bot message to show user.
 
@@ -110,21 +99,21 @@ async def init_fsm_proxy(state: FSMContext, to_store: dict):
             data[key] = value
 
 
-def get_user_dishes(user_id: int) -> list[DishModel]:
+def get_user_dishes(user_id: int) -> list[DishInBotRepr]:
     """Get last 10 dishes from db_manager."""
     dishes = filter_dishes(
-        db_manager.get_all_user_dishes(user_id)
+        db_filter.get_user_dishes(user_id)
     )
     return dishes
 
 
-async def save_history_dish_in_proxy(dish: DishModel, state: FSMContext):
+async def save_history_dish_in_proxy(dish: DishInBotRepr, state: FSMContext):
     """Save chose dish from history to proxy."""
     async with state.proxy() as data:
         data['history_dish'] = dish
 
 
-async def get_proxy_history_dish(state: FSMContext) -> DishModel:
+async def get_proxy_history_dish(state: FSMContext) -> DishInBotRepr:
     """Get saved dish in proxy."""
     async with state.proxy() as data:
         return data['history_dish']
@@ -151,7 +140,7 @@ async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
 
 async def send_msg_with_dish(
         update: Union[types.Message, types.CallbackQuery],
-        dish: DishModel,
+        dish: DishInBotRepr,
         keyboard=None) -> None:
     await bot.send_photo(
         chat_id=get_chat_id(update),
