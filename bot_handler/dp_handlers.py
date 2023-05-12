@@ -110,8 +110,9 @@ async def show_instruction_in_search_callback(callback: types.CallbackQuery,
     elif callback.data == 'save':
         async with state.proxy() as data:
             dish: DishInBotRepr = get_cur_dish(data)
-            user: UserModel = get_cur_user(data)
-            db_filter.save_dish(dish, user)  # TODO refactor args
+            user: TelegramUser = get_cur_user(data)
+            #  maybe user.save_dish(dish) ?
+            db_filter.save_dish(dish=dish, user=user)
             await callback.answer('SAVED!')
 
 
@@ -132,6 +133,7 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
     elif callback.data.startswith(more_info_prefix):
         dish_id = int(callback.data.removeprefix(more_info_prefix))
         dish: DishInBotRepr = db_filter.get_dish(dish_id)
+
         await save_history_dish_in_proxy(dish=dish, state=state)
         await FindDishState.show_history_dish.set()
         await send_history_dish_info(callback)

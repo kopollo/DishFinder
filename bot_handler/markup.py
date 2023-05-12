@@ -27,3 +27,11 @@ class DishInBotRepr:  # stupid name
 
     def preview(self):
         return self.title + '\n' + '\n' + self.ingredients
+
+
+@dataclass
+class TelegramUser:
+    tg_id: int
+    first_name: str
+    last_name: str
+    language: str = "en"

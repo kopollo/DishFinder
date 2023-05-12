@@ -2,9 +2,8 @@
 from aiogram import types
 from aiogram.dispatcher.middlewares import BaseMiddleware
 
-# from bot_handler.setup import db_filter, dp
-from bot_handler.utils import init_fsm_proxy, get_chat_id, get_cur_state, \
-    init_user_model
+from .markup import TelegramUser
+from .utils import init_fsm_proxy, get_chat_id, get_cur_state, init_user
 from .setup import db_filter
 
 
@@ -20,7 +19,7 @@ class CheckUserMiddleware(BaseMiddleware):
         user_id = get_chat_id(update)
 
         if not db_filter.get_user(user_id):
-            user = init_user_model(update)
+            user: TelegramUser = init_user(update)
             db_filter.add_user(user)
         state = get_cur_state(user_id)
         async with state.proxy() as data:

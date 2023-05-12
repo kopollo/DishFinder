@@ -7,10 +7,8 @@ from dataclasses import asdict
 
 from aiogram.types import Update
 
-from db import UserModel
 from .keboards import StartKeyboard
-from .markup import DishInBotRepr
-# from food_api_handler.food_searcher import DishApiRepr
+from .markup import DishInBotRepr, TelegramUser
 from .setup import db_filter, bot, dp
 from .msg_templates import START, SORRY
 
@@ -25,12 +23,12 @@ def get_cur_dish(data: FSMContextProxy) -> DishInBotRepr:
     return data['dishes'][data['cur_dish_id']]
 
 
-def get_cur_user(data: FSMContextProxy) -> UserModel:
+def get_cur_user(data: FSMContextProxy) -> TelegramUser:
     """
     Extract user from context manager.
 
     :param data: context manager storage
-    :return: UserModel
+    :return: TelegramUser
     """
     return data['user']
 
@@ -150,11 +148,12 @@ async def send_msg_with_dish(
     )
 
 
-def init_user_model(
-        update: Union[types.Message, types.CallbackQuery]) -> UserModel:
-    user = UserModel(
+def init_user(
+        update: Union[types.Message, types.CallbackQuery]) -> TelegramUser:
+    user = TelegramUser(
         first_name=update.from_user.first_name,
         last_name=update.from_user.last_name,
         tg_id=update.from_user.id,
+        language="en"
     )
     return user
