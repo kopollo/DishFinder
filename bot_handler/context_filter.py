@@ -4,6 +4,8 @@ from typing import Optional
 from bot_handler.markup import DishInBotRepr, TelegramUser
 from db.db_manager import DBManager
 from db import DishModel, UserModel
+from food_api_handler.food_searcher import FoodApiManager
+from food_api_handler.requests_wrapper import DishApiRepr
 
 db_manager = DBManager()
 
@@ -56,3 +58,16 @@ class DBFilter:
 
     def _to_user_model(self, tg_user: TelegramUser) -> Optional[UserModel]:
         return UserModel(**asdict(tg_user))
+
+
+class DishSearchFilter:
+    def __init__(self, ingredients):
+        dishes = FoodApiManager(ingredients).get_dishes()
+        self.dishes = [self._from_api_to_tg_dish(dish) for dish in dishes]
+
+    def get_dishes(self) -> list[DishInBotRepr]:
+        return self.dishes
+
+    def _from_api_to_tg_dish(self, dish: DishApiRepr):
+        dish_repr = DishInBotRepr(**asdict(dish))
+        return dish_repr

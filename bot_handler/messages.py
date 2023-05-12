@@ -1,13 +1,7 @@
 """Contain functions that control bot messages."""
-from typing import Union
-
-import aiogram
 from aiogram.utils.exceptions import MessageNotModified
-from aiogram import types
-from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from .keboards import HistoryKeyboard, HistoryDishInstructionKeyboard, \
     StartKeyboard, HistoryDishInfoKeyboard, ChooseDishKeyboard
-# from .setup import bot, db_manager
 from .utils import *
 from .markup import DishInBotRepr
 from .msg_templates import *
@@ -19,7 +13,7 @@ async def update_dish_message(callback: types.CallbackQuery,
     Update dish message to implement pagination.
 
     :param callback: callback info from pressed btn
-    :param dish: DishApiRepr object
+    :param dish: DishInBotRepr object
     :return: None
     """
     photo = types.InputMediaPhoto(media=dish.image_url,

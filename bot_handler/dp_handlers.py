@@ -1,13 +1,10 @@
 """Contain message and callback handlers."""
 from aiogram.utils import executor
 
-from .context_filter import DBFilter
+from .context_filter import DishSearchFilter
 from .markup import FindDishState
 from .middleware import CheckUserMiddleware
-from .setup import *
-from .utils import *
 from .messages import *
-from food_api_handler.food_searcher import FoodApiManager
 from .msg_templates import *
 from .keboards import *
 
@@ -60,12 +57,6 @@ async def settings_cmd(message: types.Message):
     )
 
 
-def __from_api_to_norm_test(dish):
-    #  DELETE TOMORROW
-    dish_repr = DishInBotRepr(**asdict(dish))
-    return dish_repr
-
-
 @dp.message_handler(state=FindDishState.enter_ingredients)
 async def enter_ingredients(message: types.Message, state: FSMContext):
     """
@@ -76,11 +67,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     :return: None
     """
     ingredients: str = message.text
-    dishes_api = FoodApiManager(ingredients).get_dishes()
-    dishes = [__from_api_to_norm_test(dish) for dish in dishes_api]
-    # dishes: DishInBotRepr = __from_api_to_norm_test(
-    #     dish_api
-    # )
+    dishes = DishSearchFilter(ingredients).get_dishes()
     if not dishes:
         await to_start(update=message, text=SORRY)
         return None

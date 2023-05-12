@@ -3,10 +3,6 @@ from typing import Union
 
 from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
-from dataclasses import asdict
-
-from aiogram.types import Update
-
 from .keboards import StartKeyboard
 from .markup import DishInBotRepr, TelegramUser
 from .setup import db_filter, bot, dp
@@ -18,7 +14,7 @@ def get_cur_dish(data: FSMContextProxy) -> DishInBotRepr:
     Extract dish from context manager.
 
     :param data: context manager storage
-    :return: DishApiRepr
+    :return: DishInBotRepr
     """
     return data['dishes'][data['cur_dish_id']]
 
