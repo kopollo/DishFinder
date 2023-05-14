@@ -1,3 +1,4 @@
+"""Contain bot replicas."""
 START = """
 HI HI HI HI
 /history

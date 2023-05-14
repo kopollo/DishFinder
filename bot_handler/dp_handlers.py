@@ -1,8 +1,8 @@
 """Contain message and callback handlers."""
 from aiogram.utils import executor
 
-from .context_filter import DishSearchFilter
-from .markup import FindDishState
+from .facades import DishSearchFilter
+from .bot_context import FindDishState
 from .middleware import CheckUserMiddleware
 from .messages import *
 from .msg_templates import *
@@ -38,7 +38,7 @@ async def check_history_cmd(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=['start'], state='*')
 async def init_dialog_cmd(message: types.Message, state: FSMContext):
     """
-    Handle /start command, that send welcome msg.
+    Handle /start command that send welcome msg.
 
     :param message: input msg from user
     :param state: position in the final state machine
@@ -49,6 +49,7 @@ async def init_dialog_cmd(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=['settings'], state='*')
 async def settings_cmd(message: types.Message):
+    """Handle /settings command."""
     await FindDishState.settings.set()
     await send_text_msg(
         update=message,
@@ -205,6 +206,7 @@ async def dish_list_in_search_callback(
 @dp.callback_query_handler(state=FindDishState.settings)
 async def settings_callback(
         callback: types.CallbackQuery, state: FSMContext):
+    """Handle callback data in SettingsKeyboard."""
     if callback.data == 'eng':
         pass
     elif callback.data == 'ru':

@@ -4,7 +4,7 @@ from typing import Union
 from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
 from .keboards import StartKeyboard
-from .markup import DishInBotRepr, TelegramUser
+from .bot_context import DishInBotRepr, TelegramUser
 from .setup import db_filter, bot, dp
 from .msg_templates import START, SORRY
 
@@ -52,7 +52,14 @@ def prev_dish(data: FSMContextProxy):
 
 
 async def to_start(update: Union[types.Message, types.CallbackQuery],
-                   text: str):
+                   text: str) -> None:
+    """
+    Reset state and send message.
+
+    :param update: aiogram object with input data
+    :param text: text
+    :return: None
+    """
     state = get_cur_state(get_chat_id(update))
     await state.reset_state(with_data=False)
     await send_text_msg(
@@ -63,7 +70,7 @@ async def to_start(update: Union[types.Message, types.CallbackQuery],
 
 
 def filter_dishes(dishes: list[DishInBotRepr]) -> list[DishInBotRepr]:
-    """limit the number of dishes shown to the user to 10."""
+    """Limit the number of dishes shown to the user to 10."""
     return dishes[:10]
 
 
@@ -113,11 +120,18 @@ async def get_proxy_history_dish(state: FSMContext) -> DishInBotRepr:
         return data['history_dish']
 
 
-def get_chat_id(update: Union[types.Message, types.CallbackQuery]):
+def get_chat_id(update: Union[types.Message, types.CallbackQuery]) -> int:
+    """
+    Get chat id.
+
+    :param update: aiogram object with input data
+    :return: int
+    """
     return update.from_user.id
 
 
 def get_cur_state(chat_id: int) -> FSMContext:
+    """Get current state in FSM."""
     state = dp.current_state(chat=chat_id, user=chat_id)
     return state
 
@@ -125,6 +139,14 @@ def get_cur_state(chat_id: int) -> FSMContext:
 async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
                         text: str,
                         keyboard=None) -> None:
+    """
+    Send text message with or without keyboard.
+
+    :param update: aiogram object with input data
+    :param text: text
+    :param keyboard: KeyboardMarkup
+    :return: None
+    """
     await bot.send_message(
         chat_id=get_chat_id(update),
         text=text,
@@ -136,20 +158,17 @@ async def send_msg_with_dish(
         update: Union[types.Message, types.CallbackQuery],
         dish: DishInBotRepr,
         keyboard=None) -> None:
+    """
+    Send message with dish info.
+
+    :param update: aiogram object with input data
+    :param dish: DishInBotRepr
+    :param keyboard: KeyboardMarkup
+    :return: None
+    """
     await bot.send_photo(
         chat_id=get_chat_id(update),
         reply_markup=keyboard,
         photo=dish.image_url,
         caption=dish.preview(),
     )
-
-
-def init_user(
-        update: Union[types.Message, types.CallbackQuery]) -> TelegramUser:
-    user = TelegramUser(
-        first_name=update.from_user.first_name,
-        last_name=update.from_user.last_name,
-        tg_id=update.from_user.id,
-        language="en"
-    )
-    return user

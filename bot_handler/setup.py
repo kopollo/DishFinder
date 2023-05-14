@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import logging
 
-from bot_handler.context_filter import DBFilter
+from bot_handler.facades import DBFilter
 
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 bot = Bot(TELEGRAM_TOKEN)

@@ -1,7 +1,7 @@
 """Contain keyboards."""
 from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, \
     KeyboardButton, InlineKeyboardButton
-from .markup import DishInBotRepr
+from .bot_context import DishInBotRepr
 
 
 class StartKeyboard:

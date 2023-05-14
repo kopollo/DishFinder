@@ -3,7 +3,7 @@ from aiogram.utils.exceptions import MessageNotModified
 from .keboards import HistoryKeyboard, HistoryDishInstructionKeyboard, \
     StartKeyboard, HistoryDishInfoKeyboard, ChooseDishKeyboard
 from .utils import *
-from .markup import DishInBotRepr
+from .bot_context import DishInBotRepr
 from .msg_templates import *
 
 
@@ -43,6 +43,7 @@ async def send_history_dish_info(callback: types.CallbackQuery) -> None:
 
 async def send_cur_dish_info(
         update: Union[types.Message, types.CallbackQuery]) -> None:
+    """Send current dish in search queue."""
     state = get_cur_state(get_chat_id(update))
     async with state.proxy() as data:
         dish: DishInBotRepr = get_cur_dish(data)
