@@ -69,6 +69,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     """
     ingredients: str = message.text
     dishes = DishSearchFilter(ingredients).get_dishes()
+    # CAN be replaced in utils as save_dishes_if_exist() to separate logic
     if not dishes:
         await to_start(update=message, text=SORRY)
         return None
@@ -208,6 +209,7 @@ async def settings_callback(
         callback: types.CallbackQuery, state: FSMContext):
     """Handle callback data in SettingsKeyboard."""
     if callback.data == 'eng':
+        # upd user's lang in DB
         pass
     elif callback.data == 'ru':
         pass

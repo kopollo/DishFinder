@@ -17,16 +17,14 @@ class CheckUserMiddleware(BaseMiddleware):
         if not update:
             update = full_update.callback_query
         user_id = get_chat_id(update)
-
-        if not db_filter.get_user(user_id):
-            user: TelegramUser = TelegramUser.init_by_update(update)
-            db_filter.add_user(user)
         state = get_cur_state(user_id)
         async with state.proxy() as data:
             if not data:
+                user: TelegramUser = TelegramUser.init_by_update(update)
+                db_filter.add_user(user)
                 to_store = {
                     'chat_id': user_id,
                     'cur_dish_id': 0,
-                    'user': db_filter.get_user(user_id)
+                    'user': user
                 }
                 await init_fsm_proxy(state, to_store)

@@ -136,17 +136,23 @@ def get_cur_state(chat_id: int) -> FSMContext:
     return state
 
 
+from translate import Translator
+
+translator = Translator(to_lang='ru')
+
+
 async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
                         text: str,
                         keyboard=None) -> None:
     """
-    Send text message with or without keyboard.
+    Send text simple message with or without keyboard.
 
     :param update: aiogram object with input data
     :param text: text
     :param keyboard: KeyboardMarkup
     :return: None
     """
+    text = translator.translate(text)
     await bot.send_message(
         chat_id=get_chat_id(update),
         text=text,
@@ -170,5 +176,5 @@ async def send_msg_with_dish(
         chat_id=get_chat_id(update),
         reply_markup=keyboard,
         photo=dish.image_url,
-        caption=dish.preview(),
+        caption=translator.translate(dish.preview()),
     )
