@@ -21,7 +21,8 @@ class CheckUserMiddleware(BaseMiddleware):
         async with state.proxy() as data:
             if not data:
                 user: TelegramUser = TelegramUser.init_by_update(update)
-                db_storage.add_user(user)
+                if not db_storage.get_user(user_id):
+                    db_storage.add_user(user)
                 to_store = {
                     'chat_id': user_id,
                     'cur_dish_id': 0,

@@ -69,6 +69,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     :return: None
     """
     ingredients: str = message.text
+    ingredients = LangChecker(get_chat_id(message)).to_eng(ingredients)
     dishes = dish_search.get_dishes(ingredients)
     # CAN be replaced in utils as save_dishes_if_exist() to separate logic
     if not dishes:
