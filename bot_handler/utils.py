@@ -5,8 +5,9 @@ from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
 from .keboards import StartKeyboard
 from .bot_context import DishInBotRepr, TelegramUser
-from .setup import db_filter, bot, dp
-from .msg_templates import START, SORRY
+from .setup import db_storage, bot, dp
+from .services import lang_checker
+# from .msg_templates import START, SORRY
 
 
 def get_cur_dish(data: FSMContextProxy) -> DishInBotRepr:
@@ -103,7 +104,7 @@ async def init_fsm_proxy(state: FSMContext, to_store: dict):
 def get_user_dishes(user_id: int) -> list[DishInBotRepr]:
     """Get last 10 dishes from db_manager."""
     dishes = filter_dishes(
-        db_filter.get_user_dishes(user_id)
+        db_storage.get_user_dishes(user_id)
     )
     return dishes
 
@@ -122,10 +123,7 @@ async def get_proxy_history_dish(state: FSMContext) -> DishInBotRepr:
 
 def get_chat_id(update: Union[types.Message, types.CallbackQuery]) -> int:
     """
-    Get chat id.
-
-    :param update: aiogram object with input data
-    :return: int
+    Extract chat id by Update object.
     """
     return update.from_user.id
 
@@ -134,11 +132,6 @@ def get_cur_state(chat_id: int) -> FSMContext:
     """Get current state in FSM."""
     state = dp.current_state(chat=chat_id, user=chat_id)
     return state
-
-
-from translate import Translator
-
-translator = Translator(to_lang='ru')
 
 
 async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
@@ -152,7 +145,7 @@ async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
     :param keyboard: KeyboardMarkup
     :return: None
     """
-    text = translator.translate(text)
+    text = lang_checker(user_id=get_chat_id(update), text=text)
     await bot.send_message(
         chat_id=get_chat_id(update),
         text=text,
@@ -172,9 +165,10 @@ async def send_msg_with_dish(
     :param keyboard: KeyboardMarkup
     :return: None
     """
+    text = lang_checker(user_id=get_chat_id(update), text=dish.preview())
     await bot.send_photo(
         chat_id=get_chat_id(update),
         reply_markup=keyboard,
         photo=dish.image_url,
-        caption=translator.translate(dish.preview()),
+        caption=text,
     )

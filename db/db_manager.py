@@ -119,3 +119,12 @@ class DBManager:
             dish_id=dish_model.id,
             user_id=user_model.tg_id,
         )
+
+    def set_user_lang(self, user_id: int, lang: str):
+        db_sess = db_session.create_session()
+        user: UserModel = db_sess.query(UserModel).filter(
+            UserModel.tg_id == user_id).first()
+        user.language = lang
+        db_sess.commit()
+
+

@@ -1,7 +1,7 @@
 """Contain message and callback handlers."""
 from aiogram.utils import executor
 
-from .facades import DishSearchFilter
+from .services import DishSearchFilter
 from .bot_context import FindDishState
 from .middleware import CheckUserMiddleware
 from .messages import *
@@ -68,6 +68,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     :return: None
     """
     ingredients: str = message.text
+    # ingredients = t
     dishes = DishSearchFilter(ingredients).get_dishes()
     # CAN be replaced in utils as save_dishes_if_exist() to separate logic
     if not dishes:
@@ -101,7 +102,7 @@ async def show_instruction_in_search_callback(callback: types.CallbackQuery,
             dish: DishInBotRepr = get_cur_dish(data)
             user: TelegramUser = get_cur_user(data)
             #  maybe user.save_dish(dish) ?
-            db_filter.save_dish(dish=dish, user=user)
+            db_storage.save_dish(dish=dish, user=user)
             await callback.answer('SAVED!')
 
 
@@ -121,7 +122,7 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
 
     elif callback.data.startswith(more_info_prefix):
         dish_id = int(callback.data.removeprefix(more_info_prefix))
-        dish: DishInBotRepr = db_filter.get_dish(dish_id)
+        dish: DishInBotRepr = db_storage.get_dish(dish_id)
 
         await save_history_dish_in_proxy(dish=dish, state=state)
         await FindDishState.show_history_dish.set()
@@ -209,12 +210,9 @@ async def settings_callback(
         callback: types.CallbackQuery, state: FSMContext):
     """Handle callback data in SettingsKeyboard."""
     if callback.data == 'eng':
-        # upd user's lang in DB
-        pass
+        db_storage.set_user_lang(get_chat_id(callback), lang='en')
     elif callback.data == 'ru':
-        pass
-    elif callback.data == 'back':
-        pass
+        db_storage.set_user_lang(get_chat_id(callback), lang='ru')
     await callback.message.delete()
     await to_start(update=callback, text=START)
 

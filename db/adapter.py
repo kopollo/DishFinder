@@ -38,6 +38,7 @@ class DBAdapter:
         return dish_repr
 
     def get_dish(self, dish_id: int) -> DishInBotRepr:
+        """Return dish from DB by id."""
         return self._to_dish_in_bot_repr(db_manager.get_dish(dish_id))
 
     def save_dish(self, dish: DishInBotRepr, user: TelegramUser) -> None:
@@ -61,6 +62,12 @@ class DBAdapter:
         if not user_model:
             return None
         return self._to_telegram_user(user_model)
+
+    def set_user_lang(self, user_id: int, lang: str) -> None:
+        try:
+            db_manager.set_user_lang(user_id=user_id, lang=lang)
+        except Exception:
+            print('cant set lang to user')
 
 
 db_adapter = DBAdapter()

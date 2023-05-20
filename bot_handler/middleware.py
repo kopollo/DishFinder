@@ -4,7 +4,7 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 
 from .bot_context import TelegramUser
 from .utils import init_fsm_proxy, get_chat_id, get_cur_state
-from .setup import db_filter
+from .setup import db_storage
 
 
 class CheckUserMiddleware(BaseMiddleware):
@@ -21,7 +21,7 @@ class CheckUserMiddleware(BaseMiddleware):
         async with state.proxy() as data:
             if not data:
                 user: TelegramUser = TelegramUser.init_by_update(update)
-                db_filter.add_user(user)
+                db_storage.add_user(user)
                 to_store = {
                     'chat_id': user_id,
                     'cur_dish_id': 0,
