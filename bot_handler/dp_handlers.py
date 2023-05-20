@@ -1,12 +1,13 @@
 """Contain message and callback handlers."""
 from aiogram.utils import executor
 
-from .services import DishSearchFilter
+from .services.dish_search import DishSearchFilter
 from .bot_context import FindDishState
 from .middleware import CheckUserMiddleware
 from .messages import *
 from .msg_templates import *
 from .keboards import *
+import bot_handler.services.db_storage as db_storage
 
 
 @dp.message_handler(commands=['find_dish'], state='*')

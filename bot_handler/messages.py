@@ -8,7 +8,7 @@ from .msg_templates import *
 
 
 async def update_dish_message(callback: types.CallbackQuery,
-                              dish: DishInBotRepr):
+                              dish: DishInBotRepr) -> None:
     """
     Update dish message to implement pagination.
 
@@ -16,7 +16,9 @@ async def update_dish_message(callback: types.CallbackQuery,
     :param dish: DishInBotRepr object
     :return: None
     """
-    caption = lang_checker(user_id=get_chat_id(callback), text=dish.preview())
+    caption = LangChecker.to_user_lang(user_id=get_chat_id(callback),
+                                       text=dish.preview())
+
     photo = types.InputMediaPhoto(media=dish.image_url,
                                   caption=caption)
     try:
@@ -56,7 +58,7 @@ async def send_cur_dish_info(
 
 
 async def send_history_widget(
-        update: Union[types.Message, types.CallbackQuery]):
+        update: Union[types.Message, types.CallbackQuery]) -> None:
     """Send widget with dishes in history."""
     dishes: list[DishInBotRepr] = get_user_dishes(get_chat_id(update))
     if not dishes:

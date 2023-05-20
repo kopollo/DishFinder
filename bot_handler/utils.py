@@ -5,9 +5,9 @@ from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
 from .keboards import StartKeyboard
 from .bot_context import DishInBotRepr, TelegramUser
-from .setup import db_storage, bot, dp
-from .services import lang_checker
-# from .msg_templates import START, SORRY
+from .setup import bot, dp
+from .services.lang_checker import LangChecker
+import bot_handler.services.db_storage as db_storage
 
 
 def get_cur_dish(data: FSMContextProxy) -> DishInBotRepr:
@@ -122,9 +122,7 @@ async def get_proxy_history_dish(state: FSMContext) -> DishInBotRepr:
 
 
 def get_chat_id(update: Union[types.Message, types.CallbackQuery]) -> int:
-    """
-    Extract chat id by Update object.
-    """
+    """Extract chat id by Update object."""
     return update.from_user.id
 
 
@@ -145,7 +143,7 @@ async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
     :param keyboard: KeyboardMarkup
     :return: None
     """
-    text = lang_checker(user_id=get_chat_id(update), text=text)
+    text = LangChecker(get_chat_id(update)).to_user_lang(text)
     await bot.send_message(
         chat_id=get_chat_id(update),
         text=text,
@@ -165,7 +163,7 @@ async def send_msg_with_dish(
     :param keyboard: KeyboardMarkup
     :return: None
     """
-    text = lang_checker(user_id=get_chat_id(update), text=dish.preview())
+    text = LangChecker(get_chat_id(update)).to_user_lang(dish.preview())
     await bot.send_photo(
         chat_id=get_chat_id(update),
         reply_markup=keyboard,

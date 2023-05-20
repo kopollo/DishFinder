@@ -4,7 +4,7 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 
 from .bot_context import TelegramUser
 from .utils import init_fsm_proxy, get_chat_id, get_cur_state
-from .setup import db_storage
+import bot_handler.services.db_storage as db_storage
 
 
 class CheckUserMiddleware(BaseMiddleware):
