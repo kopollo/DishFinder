@@ -3,9 +3,7 @@ from typing import Optional
 
 from bot_handler.bot_context import DishInBotRepr, TelegramUser
 from db import DishModel, UserModel
-from .db_manager import DBManager
-
-db_manager = DBManager()
+import db.manager as db_manager
 
 
 class DBAdapter:

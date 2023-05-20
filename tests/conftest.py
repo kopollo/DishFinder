@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from db import db_session, UserModel
 from db.db_session import SqlAlchemyBase
 from db.dishes import DishModel
-from db.db_manager import DBManager
+from db.manager import DBManager
 
 test_db_url = f'sqlite:///tests/test_dish_finder.db?check_same_thread=False'
 
