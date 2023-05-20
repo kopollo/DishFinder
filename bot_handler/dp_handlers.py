@@ -1,13 +1,13 @@
 """Contain message and callback handlers."""
 from aiogram.utils import executor
 
-from .services.dish_search import DishSearchFilter
 from .bot_context import FindDishState
 from .middleware import CheckUserMiddleware
 from .messages import *
 from .msg_templates import *
 from .keboards import *
 import bot_handler.services.db_storage as db_storage
+import bot_handler.services.dish_search_port as dish_search
 
 
 @dp.message_handler(commands=['find_dish'], state='*')
@@ -69,8 +69,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     :return: None
     """
     ingredients: str = message.text
-    # ingredients = t
-    dishes = DishSearchFilter(ingredients).get_dishes()
+    dishes = dish_search.get_dishes(ingredients)
     # CAN be replaced in utils as save_dishes_if_exist() to separate logic
     if not dishes:
         await to_start(update=message, text=SORRY)
