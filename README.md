@@ -10,11 +10,12 @@ Telegram bot that helps you find idea for dish - just enter ingredients and choo
 - Saving dishes in 'history'
 - Display up to 5 options at once
 - Convinient user interface with pagination 
+- russian and english languages support
 ## Dependencies
 
 - sqlalchemy 
 - aiogram
-- pygame
+- translate
 - requests
 ## Codestyle linters and tests 
 
@@ -29,7 +30,8 @@ The project has been checked and tested with the following tools:
 - [ ] Asynchronous API Calls
 - [ ] Change DB on Postgres
 - [X] Ability to view the full recipe through history
-
+- [ ] Change translator's api
+- [ ] Add `babel` as translation manager
 ## How to start
 
 ### For developers
