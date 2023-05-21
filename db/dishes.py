@@ -17,6 +17,3 @@ class DishModel(SqlAlchemyBase):
     image_url = sqlalchemy.Column(sqlalchemy.String)
     instruction = sqlalchemy.Column(sqlalchemy.String)
     ingredients = sqlalchemy.Column(sqlalchemy.String)
-
-    def preview(self):
-        return self.title + '\n' + '\n' + self.ingredients

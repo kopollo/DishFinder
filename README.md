@@ -25,7 +25,7 @@ The project has been checked and tested with the following tools:
 
 ## TODO
 
-- [ ] Translation in russian and english
+- [X] Translation in russian and english
 - [ ] Asynchronous API Calls
 - [ ] Change DB on Postgres
 - [X] Ability to view the full recipe through history

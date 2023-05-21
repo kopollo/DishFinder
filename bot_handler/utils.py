@@ -1,31 +1,31 @@
 """Contain utils for bot handlers."""
+from typing import Union
+
 from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
-from dataclasses import asdict
-
-from db import DishModel, UserModel
-from .markup import StartKeyboard
-
-from food_api_handler.food_searcher import DishApiRepr
-from .setup import db_manager
+from .keboards import StartKeyboard
+from .bot_context import DishInBotRepr, TelegramUser
+from .setup import bot, dp
+from .services.lang_checker import LangChecker
+import bot_handler.services.db_storage as db_storage
 
 
-def get_cur_dish(data: FSMContextProxy) -> DishApiRepr:
+def get_cur_dish(data: FSMContextProxy) -> DishInBotRepr:
     """
     Extract dish from context manager.
 
     :param data: context manager storage
-    :return: DishApiRepr
+    :return: DishInBotRepr
     """
     return data['dishes'][data['cur_dish_id']]
 
 
-def get_cur_user(data: FSMContextProxy) -> UserModel:
+def get_cur_user(data: FSMContextProxy) -> TelegramUser:
     """
     Extract user from context manager.
 
     :param data: context manager storage
-    :return: UserModel
+    :return: TelegramUser
     """
     return data['user']
 
@@ -52,36 +52,30 @@ def prev_dish(data: FSMContextProxy):
     data['cur_dish_id'] = max(cur_dish_id - 1, 0)
 
 
-def from_dish_api_repr(dish: DishApiRepr) -> DishModel:
+async def to_start(update: Union[types.Message, types.CallbackQuery],
+                   text: str) -> None:
     """
-    Transfer DishApiRepr to DishModel.
+    Reset state and send message.
 
-    :param dish: DishApiRepr
-    :return: DishModel
+    :param update: aiogram object with input data
+    :param text: text
+    :return: None
     """
-    dish_model = DishModel(**asdict(dish))
-    return dish_model
+    state = get_cur_state(get_chat_id(update))
+    await state.reset_state(with_data=False)
+    await send_text_msg(
+        update=update,
+        text=text,
+        keyboard=StartKeyboard(),
+    )
 
 
-async def to_start(callback: types.CallbackQuery):
-    """
-    Relocate user to start state.
-
-    :param callback: callback info from pressed btn
-    :return:
-    """
-    text = """welcome back"""
-    await callback.message.answer(text=text, reply_markup=StartKeyboard())
-    await callback.message.delete()
-    await callback.answer()
-
-
-def filter_dishes(dishes: list[DishModel]) -> list[DishModel]:
-    """Bound dishes to show user by 10."""
+def filter_dishes(dishes: list[DishInBotRepr]) -> list[DishInBotRepr]:
+    """Limit the number of dishes shown to the user to 10."""
     return dishes[:10]
 
 
-def format_dishes_for_message(dishes: list[DishModel]) -> str:
+def format_dishes_for_message(dishes: list[DishInBotRepr]) -> str:
     """
     Format dishes for bot message to show user.
 
@@ -107,21 +101,72 @@ async def init_fsm_proxy(state: FSMContext, to_store: dict):
             data[key] = value
 
 
-def get_dishes_to_history(user_id: int) -> list[DishModel]:
+def get_user_dishes(user_id: int) -> list[DishInBotRepr]:
     """Get last 10 dishes from db_manager."""
     dishes = filter_dishes(
-        db_manager.get_all_user_dishes(user_id)
+        db_storage.get_user_dishes(user_id)
     )
     return dishes
 
 
-async def save_history_dish_in_proxy(dish: DishModel, state: FSMContext):
+async def save_history_dish_in_proxy(dish: DishInBotRepr, state: FSMContext):
     """Save chose dish from history to proxy."""
     async with state.proxy() as data:
         data['history_dish'] = dish
 
 
-async def get_proxy_history_dish(state: FSMContext) -> DishModel:
+async def get_proxy_history_dish(state: FSMContext) -> DishInBotRepr:
     """Get saved dish in proxy."""
     async with state.proxy() as data:
         return data['history_dish']
+
+
+def get_chat_id(update: Union[types.Message, types.CallbackQuery]) -> int:
+    """Extract chat id by Update object."""
+    return update.from_user.id
+
+
+def get_cur_state(chat_id: int) -> FSMContext:
+    """Get current state in FSM."""
+    state = dp.current_state(chat=chat_id, user=chat_id)
+    return state
+
+
+async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
+                        text: str,
+                        keyboard=None) -> None:
+    """
+    Send text simple message with or without keyboard.
+
+    :param update: aiogram object with input data
+    :param text: text
+    :param keyboard: KeyboardMarkup
+    :return: None
+    """
+    text = LangChecker(get_chat_id(update)).to_user_lang(text)
+    await bot.send_message(
+        chat_id=get_chat_id(update),
+        text=text,
+        reply_markup=keyboard,
+    )
+
+
+async def send_msg_with_dish(
+        update: Union[types.Message, types.CallbackQuery],
+        dish: DishInBotRepr,
+        keyboard=None) -> None:
+    """
+    Send message with dish info.
+
+    :param update: aiogram object with input data
+    :param dish: DishInBotRepr
+    :param keyboard: KeyboardMarkup
+    :return: None
+    """
+    text = LangChecker(get_chat_id(update)).to_user_lang(dish.preview())
+    await bot.send_photo(
+        chat_id=get_chat_id(update),
+        reply_markup=keyboard,
+        photo=dish.image_url,
+        caption=text,
+    )
