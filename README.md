@@ -40,10 +40,10 @@ The project has been checked and tested with the following tools:
 ## Design
 
 ### State diagram 
-![image](https://user-images.githubusercontent.com/114457052/236517303-dd02980a-8d4c-4054-b493-38e1553991e0.png)
+![image](https://github.com/kopollo/DishFinder/assets/114457052/75441119-33a6-4422-8ac3-a64fa07320d7)
 
 ### Sequence diagram 
-![image](https://user-images.githubusercontent.com/114457052/234188130-1be8a3c9-6520-47f7-941c-8012c794d22e.png)
+![image](https://github.com/kopollo/DishFinder/assets/114457052/3e4af554-4076-465e-ba8d-3cdfa182ccb4)
 
 ### Secret
 Tome AI creates an image of happy customers who have discovered the right dish.
