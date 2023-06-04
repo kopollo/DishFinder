@@ -9,4 +9,6 @@ TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 bot = Bot(TELEGRAM_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(format='%(asctime)s %(message)s',
+                    datefmt='%m/%d/%Y %I:%M:%S %p',
+                    level=logging.INFO)

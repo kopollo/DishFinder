@@ -8,6 +8,7 @@ from .bot_context import DishInBotRepr, TelegramUser
 from .setup import bot, dp
 from .services.lang_checker import LangChecker
 import bot_handler.services.db_storage as db_storage
+import logging
 
 
 def get_cur_dish(data: FSMContextProxy) -> DishInBotRepr:
@@ -134,7 +135,7 @@ def get_cur_state(chat_id: int) -> FSMContext:
 
 async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
                         text: str,
-                        keyboard=None) -> None:
+                        keyboard=None) -> None:  # forget about type
     """
     Send text simple message with or without keyboard.
 
@@ -164,6 +165,7 @@ async def send_msg_with_dish(
     :return: None
     """
     text = LangChecker(get_chat_id(update)).to_user_lang(dish.preview())
+    logging.info(dish.title + " " + str(update.from_user.id))
     await bot.send_photo(
         chat_id=get_chat_id(update),
         reply_markup=keyboard,
