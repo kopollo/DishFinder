@@ -2,11 +2,12 @@ from dataclasses import asdict
 from typing import Optional
 
 from bot_handler.bot_context import DishInBotRepr, TelegramUser
+from bot_handler.services.storage_port import BaseStorage
 from db import DishModel, UserModel
-import db.manager as db_manager
+import db.crud_wrappers as db_manager
 
 
-class DBAdapter:
+class DBAdapter(BaseStorage):
 
     def _to_dish_in_bot_repr(self, dish: DishModel) -> DishInBotRepr:
         dish_repr = DishInBotRepr(
@@ -66,6 +67,3 @@ class DBAdapter:
             db_manager.set_user_lang(user_id=user_id, lang=lang)
         except Exception:
             print('cant set lang to user')
-
-
-db_adapter = DBAdapter()

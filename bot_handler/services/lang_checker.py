@@ -1,10 +1,10 @@
 from translate import Translator
-from ..services.db_storage import get_user
+from ..setup import db_manager
 
 
 class LangChecker:
     def __init__(self, user_id: int) -> None:
-        self.lang = get_user(user_id).language
+        self.lang = db_manager.get_user(user_id).language
         # Looks like better store that info in runtime
 
     def _should_proceed(self) -> bool:

@@ -6,7 +6,7 @@ from .middleware import CheckUserMiddleware
 from .messages import *
 from .msg_templates import *
 from .keboards import *
-import bot_handler.services.db_storage as db_storage
+from .setup import db_manager
 import bot_handler.services.dish_search_port as dish_search
 
 
@@ -71,6 +71,7 @@ async def enter_ingredients(message: types.Message, state: FSMContext):
     ingredients: str = message.text
     ingredients = LangChecker(get_chat_id(message)).to_eng(ingredients)
     dishes = dish_search.get_dishes(ingredients)
+    logging.info(ingredients + " " + str(message.from_user.id))
     # CAN be replaced in utils as save_dishes_if_exist() to separate logic
     if not dishes:
         await to_start(update=message, text=SORRY)
@@ -103,7 +104,7 @@ async def show_instruction_in_search_callback(callback: types.CallbackQuery,
             dish: DishInBotRepr = get_cur_dish(data)
             user: TelegramUser = get_cur_user(data)
             #  maybe user.save_dish(dish) ?
-            db_storage.save_dish(dish=dish, user=user)
+            db_manager.save_dish(dish=dish, user=user)
             await callback.answer('SAVED!')
 
 
@@ -123,7 +124,7 @@ async def history_callback(callback: types.CallbackQuery, state: FSMContext):
 
     elif callback.data.startswith(more_info_prefix):
         dish_id = int(callback.data.removeprefix(more_info_prefix))
-        dish: DishInBotRepr = db_storage.get_dish(dish_id)
+        dish: DishInBotRepr = db_manager.get_dish(dish_id)
 
         await save_history_dish_in_proxy(dish=dish, state=state)
         await FindDishState.show_history_dish.set()
@@ -210,10 +211,10 @@ async def dish_list_in_search_callback(
 async def settings_callback(
         callback: types.CallbackQuery, state: FSMContext):
     """Handle callback data in SettingsKeyboard."""
-    if callback.data == 'eng':
-        db_storage.set_user_lang(get_chat_id(callback), lang='en')
-    elif callback.data == 'ru':
-        db_storage.set_user_lang(get_chat_id(callback), lang='ru')
+    lang = "en"
+    if callback.data == 'ru':
+        lang = "ru"
+    db_manager.set_user_lang(get_chat_id(callback), lang=lang)
     await callback.message.delete()
     await to_start(update=callback, text=START)
 
