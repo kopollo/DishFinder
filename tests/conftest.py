@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from db import db_session, UserModel
 from db.db_session import SqlAlchemyBase
 from db.dishes import DishModel
-from db.manager import DBManager
+import db.crud_wrappers as DBManager
 
 test_db_url = f'sqlite:///tests/test_dish_finder.db?check_same_thread=False'
 
@@ -39,7 +39,7 @@ def mock_db_manager(monkeypatch, correct_dish, session):
     def mockreturn():
         return session
 
-    db_manager = DBManager()
+    db_manager = DBManager
     monkeypatch.setattr(
         db_session, "create_session", mockreturn)
     yield db_manager

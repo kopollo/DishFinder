@@ -5,9 +5,8 @@ from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
 from .keboards import StartKeyboard
 from .bot_context import DishInBotRepr, TelegramUser
-from .setup import bot, dp
+from .setup import bot, dp, db_manager
 from .services.lang_checker import LangChecker
-import bot_handler.services.db_storage as db_storage
 import logging
 
 
@@ -105,7 +104,7 @@ async def init_fsm_proxy(state: FSMContext, to_store: dict):
 def get_user_dishes(user_id: int) -> list[DishInBotRepr]:
     """Get last 10 dishes from db_manager."""
     dishes = filter_dishes(
-        db_storage.get_user_dishes(user_id)
+        db_manager.get_user_dishes(user_id)
     )
     return dishes
 
