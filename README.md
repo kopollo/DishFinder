@@ -24,12 +24,14 @@ The project has been checked and tested with the following tools:
 - pytest
 
 ## TODO
-
 - [X] Translation in russian and english
-- [ ] Asynchronous API Calls
-- [ ] Change DB on Postgres
 - [X] Ability to view the full recipe through history
-
+- [ ] Asynchronous API Calls
+- [ ] Change DB to PostgreSQL
+- [ ] Rewrite translation to babel
+- [ ] Change translation API ()
+- [ ] Try to deploy to Yandex Cloud
+- [ ] Change runtime DB to Redis
 ## How to start
 
 ### For developers
