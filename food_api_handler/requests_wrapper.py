@@ -98,11 +98,7 @@ class GetRecipeInstructionsRequest:
     """Wrapper for get analyzedInstructions request."""
 
     def __init__(self, dish_id):
-        """
-        Init api url by dish_id.
-
-        :param dish_id:
-        """
+        """Init api url by dish_id."""
         self.dish_id = dish_id
         self.api_url = f'https://api.spoonacular.com/recipes/{dish_id}/analyzedInstructions'  # noqa
         self.raw_json = self._get_raw_json()
@@ -119,14 +115,12 @@ class GetRecipeInstructionsRequest:
             )
             return response.json()
         except Exception:
+            # refactor - looks terrible
             return {}
 
     def get_instruction(self) -> Optional[str]:
-        """
-        Get full instruction for dish or None if broken or incorrect dish.
-
-        :return: str or None
-        """
+        """Get full instruction for dish or None if broken or incorrect dish."""
+        # refactor None to raise NonDishException
         try:
             steps = self.raw_json[0]['steps']
         except IndexError:

@@ -6,7 +6,9 @@ from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from .services.storage_port import BaseStorage
+from .services.dish_search_port import BaseDishSearcher
 from db.adapter import DBAdapter
+from food_api_handler.adapter import FoodApiAdapter
 
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 bot = Bot(TELEGRAM_TOKEN)
@@ -17,3 +19,4 @@ logging.basicConfig(format='%(asctime)s %(message)s',
                     level=logging.INFO)
 
 db_manager: BaseStorage = DBAdapter()
+dish_searcher: BaseDishSearcher = FoodApiAdapter()
