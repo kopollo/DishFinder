@@ -1,10 +1,9 @@
 """Wrappers for food api requests."""
 import os
 from typing import Optional
-
-import requests
-
 from dataclasses import dataclass
+
+from web_utils import get_request
 
 FOOD_API_TOKEN = os.environ.get('FOOD_API_TOKEN')
 
@@ -145,23 +144,3 @@ class GetRecipeInstructionsRequest:
             line = f'{idx + 1}) {step}\n\n'
             formatted_instruction += line
         return formatted_instruction
-
-
-def get_request(server: str, params: dict[str, str] = None):
-    """
-    Make GET request to server with given params.
-
-    :param server: where we want to make a request
-    :param params: with what parameters
-    :return: response
-    """
-    try:
-        response = requests.get(server, params)
-        if not response:
-            print('Server is sad with status code', response.status_code)
-            print(response.reason)
-            return response
-        return response
-    except requests.RequestException as exc:
-        print('Oh ship :(')
-        print(exc)
