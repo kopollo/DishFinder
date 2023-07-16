@@ -1,8 +1,8 @@
 """Contain dish api adapter to core."""
 from dataclasses import asdict
 
-from bot_handler.bot_context import DishInBotRepr
-from bot_handler.services.dish_search_port import BaseDishSearcher
+from bot.context import DishInBotRepr
+from bot.services.dish_search_port import BaseDishSearcher
 from food_api_handler.food_searcher import FoodApiManager
 from food_api_handler.requests_wrapper import DishApiRepr
 

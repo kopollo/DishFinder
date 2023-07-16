@@ -1,7 +1,7 @@
 """Contain message and callback handlers."""
 from aiogram.utils import executor
 
-from .bot_context import FindDishState
+from .context import FindDishState
 from .middleware import CheckUserMiddleware
 from .messages import *
 from .msg_templates import *

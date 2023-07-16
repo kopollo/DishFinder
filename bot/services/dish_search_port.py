@@ -1,5 +1,5 @@
 """Interface for search dish api."""
-from ..bot_context import DishInBotRepr
+from ..context import DishInBotRepr
 from abc import ABC, abstractmethod
 
 

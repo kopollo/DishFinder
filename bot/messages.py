@@ -3,7 +3,7 @@ from aiogram.utils.exceptions import MessageNotModified
 from .keboards import HistoryKeyboard, HistoryDishInstructionKeyboard, \
     StartKeyboard, HistoryDishInfoKeyboard, ChooseDishKeyboard
 from .utils import *
-from .bot_context import DishInBotRepr
+from .context import DishInBotRepr
 from .msg_templates import *
 
 

@@ -2,7 +2,7 @@
 from aiogram import types
 from aiogram.dispatcher.middlewares import BaseMiddleware
 
-from .bot_context import TelegramUser
+from .context import TelegramUser
 from .utils import init_fsm_proxy, get_chat_id, get_cur_state
 from .setup import db_manager
 

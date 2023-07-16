@@ -4,7 +4,7 @@ from typing import Union
 from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
 from .keboards import StartKeyboard
-from .bot_context import DishInBotRepr, TelegramUser
+from .context import DishInBotRepr, TelegramUser
 from .setup import bot, dp, db_manager, lang_translator
 import logging
 
