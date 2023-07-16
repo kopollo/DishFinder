@@ -1,8 +1,8 @@
 from dataclasses import asdict
 from typing import Optional
 
-from bot_handler.bot_context import DishInBotRepr, TelegramUser
-from bot_handler.services.storage_port import BaseStorage
+from bot.context import DishInBotRepr, TelegramUser
+from bot.services.storage_port import BaseStorage
 from db import DishModel, UserModel
 import db.crud_wrappers as db_manager
 

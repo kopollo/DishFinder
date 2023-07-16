@@ -1,11 +1,14 @@
+"""Contain interface for storage."""
 from dataclasses import asdict
 from typing import Optional
-from ..bot_context import DishInBotRepr, TelegramUser
+from ..context import DishInBotRepr, TelegramUser
 # from db.adapter import db_adapter as adapter
 from abc import ABC, abstractmethod
 
 
 class BaseStorage(ABC):
+    """Storage interface."""
+
     @abstractmethod
     def get_dish(self, dish_id: int) -> DishInBotRepr:
         """Return a dish in DB by id and convert it to DishInBotRepr."""

@@ -1,4 +1,4 @@
-"""Contain fsm group and keyboards."""
+"""Contain Dish and User representations."""
 from dataclasses import dataclass
 from typing import Union
 

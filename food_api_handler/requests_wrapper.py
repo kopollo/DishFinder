@@ -1,10 +1,9 @@
 """Wrappers for food api requests."""
 import os
 from typing import Optional
-
-import requests
-
 from dataclasses import dataclass
+
+from web_utils import get_request
 
 FOOD_API_TOKEN = os.environ.get('FOOD_API_TOKEN')
 
@@ -98,11 +97,7 @@ class GetRecipeInstructionsRequest:
     """Wrapper for get analyzedInstructions request."""
 
     def __init__(self, dish_id):
-        """
-        Init api url by dish_id.
-
-        :param dish_id:
-        """
+        """Init api url by dish_id."""
         self.dish_id = dish_id
         self.api_url = f'https://api.spoonacular.com/recipes/{dish_id}/analyzedInstructions'  # noqa
         self.raw_json = self._get_raw_json()
@@ -119,14 +114,12 @@ class GetRecipeInstructionsRequest:
             )
             return response.json()
         except Exception:
+            # refactor - looks terrible
             return {}
 
     def get_instruction(self) -> Optional[str]:
-        """
-        Get full instruction for dish or None if broken or incorrect dish.
-
-        :return: str or None
-        """
+        """Get full instruction for dish or None if broken or incorrect dish."""
+        # refactor None to raise NonDishException
         try:
             steps = self.raw_json[0]['steps']
         except IndexError:
@@ -151,23 +144,3 @@ class GetRecipeInstructionsRequest:
             line = f'{idx + 1}) {step}\n\n'
             formatted_instruction += line
         return formatted_instruction
-
-
-def get_request(server: str, params: dict[str, str] = None):
-    """
-    Make GET request to server with given params.
-
-    :param server: where we want to make a request
-    :param params: with what parameters
-    :return: response
-    """
-    try:
-        response = requests.get(server, params)
-        if not response:
-            print('Server is sad with status code', response.status_code)
-            print(response.reason)
-            return response
-        return response
-    except requests.RequestException as exc:
-        print('Oh ship :(')
-        print(exc)
