@@ -5,8 +5,7 @@ from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
 from .keboards import StartKeyboard
 from .bot_context import DishInBotRepr, TelegramUser
-from .setup import bot, dp, db_manager
-from .services.lang_checker import LangChecker
+from .setup import bot, dp, db_manager, lang_translator
 import logging
 
 
@@ -143,7 +142,8 @@ async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
     :param keyboard: KeyboardMarkup
     :return: None
     """
-    text = LangChecker(get_chat_id(update)).to_user_lang(text)
+    user_lang = db_manager.get_user(get_chat_id(update)).language
+    text = lang_translator.translate(text=text, to_lang=user_lang)
     await bot.send_message(
         chat_id=get_chat_id(update),
         text=text,
@@ -163,7 +163,9 @@ async def send_msg_with_dish(
     :param keyboard: KeyboardMarkup
     :return: None
     """
-    text = LangChecker(get_chat_id(update)).to_user_lang(dish.preview())
+    user_lang = db_manager.get_user(get_chat_id(update)).language
+    text = lang_translator.translate(text=dish.preview(), to_lang=user_lang)
+    # text = LangChecker(get_chat_id(update)).to_user_lang(dish.preview())
     logging.info(dish.title + " " + str(update.from_user.id))
     await bot.send_photo(
         chat_id=get_chat_id(update),

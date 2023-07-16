@@ -16,7 +16,8 @@ async def update_dish_message(callback: types.CallbackQuery,
     :param dish: DishInBotRepr object
     :return: None
     """
-    caption = LangChecker(get_chat_id(callback)).to_user_lang(dish.preview())
+    user_lang = db_manager.get_user(get_chat_id(callback)).language
+    caption = lang_translator.translate(text=dish.preview(), to_lang=user_lang)
     photo = types.InputMediaPhoto(media=dish.image_url,
                                   caption=caption)
     try:
