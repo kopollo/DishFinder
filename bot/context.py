@@ -21,7 +21,6 @@ class FindDishState(StatesGroup):
 @dataclass
 class DishInBotRepr:  # stupid name
     """Representation of dish for bot."""
-
     title: str
     id: int
     image_url: str
