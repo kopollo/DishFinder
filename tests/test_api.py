@@ -37,12 +37,16 @@ def test_init_dishes_with_correct_ingredients():
                   json=_get_test_json_for_SearchByIngredientsRequest(),
                   status=200)
     dishes = SearchByIngredientsRequest('apple').init_dishes()
+    data = {
+        'title': 'Baked Cinnamon Apple Slices',
+        'id': 633547,
+        'image': 'cool.jpg',
+        'ingredients': '1) Apples\n2) Cinnamon\n3) Raisins\n',
+        "instruction": ''
+    }
     dishes_ans = [
-        DishApiRepr(
-            title='Baked Cinnamon Apple Slices',
-            id=633547, image_url='cool.jpg',
-            ingredients='1) Apples\n2) Cinnamon\n3) Raisins\n',
-            instruction='')]
+        DishApiRepr.model_validate(data)
+    ]
     assert dishes == dishes_ans
 
 
