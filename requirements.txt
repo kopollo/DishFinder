@@ -20,7 +20,6 @@ h2==3.2.0
 hpack==3.0.0
 hstspreload==2023.1.1
 httpcore==0.9.1
-httpx==0.13.3
 hyperframe==5.2.0
 idna==2.10
 iniconfig==2.0.0
@@ -40,7 +39,6 @@ pydantic_core==2.3.0
 pydocstyle==6.3.0
 pyflakes==3.0.1
 Pygments==2.14.0
-pygount==1.5.1
 pytest==7.2.2
 pytz==2022.7.1
 PyYAML==6.0
