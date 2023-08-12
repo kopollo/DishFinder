@@ -10,4 +10,6 @@ jobs:
         run: pip install -r requirements.txt
       - name: run pytest
         run: pytest
+      - name: test
+        run: echo hello its good
         
