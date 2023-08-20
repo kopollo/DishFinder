@@ -12,7 +12,7 @@ class FoodApiAdapter(BaseDishSearcher):
 
     def _from_api_to_tg_dish(self, dish: DishApiRepr):
         """Translate DishApiRepr to DishInBotRepr."""
-        dish_repr = DishInBotRepr(**asdict(dish))
+        dish_repr = DishInBotRepr(**dish.model_dump())
         return dish_repr
 
     def get_dishes(self, ingredients: str) -> list[DishInBotRepr]:

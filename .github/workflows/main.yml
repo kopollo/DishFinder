@@ -1,0 +1,13 @@
+name: demo test
+on: [workflow_dispatch, push]
+jobs:
+  print: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: get source code
+        uses: actions/checkout@v3
+      - name: install requirements
+        run: pip install -r requirements.txt
+      - name: run pytest
+        run: pytest
+        

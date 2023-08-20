@@ -1,21 +1,21 @@
 """Wrappers for food api requests."""
 import os
 from typing import Optional
-from dataclasses import dataclass
+
+from pydantic import BaseModel, Field
 
 from web_utils import get_request
 
 FOOD_API_TOKEN = os.environ.get('FOOD_API_TOKEN')
 
 
-@dataclass()
-class DishApiRepr:
+class DishApiRepr(BaseModel):
     """Representation of dish api object."""
 
     title: str
     id: int
-    image_url: str
-    ingredients: str
+    image_url: str = Field(alias='image')
+    ingredients: str = ""
     instruction: str = ""
 
 
@@ -51,19 +51,13 @@ class SearchByIngredientsRequest:
         """
         dishes: list[DishApiRepr] = []
         for i in range(len(self.raw_json)):
-            title = self.raw_json[i]['title']
-            dish_id = self.raw_json[i]['id']
-            image_url = self.raw_json[i]['image']
+            dish = DishApiRepr.model_validate(self.raw_json[i])
             ingredients = self._get_dish_ingredients(self.raw_json[i])
-            dishes.append(DishApiRepr(
-                title=title,
-                id=dish_id,
-                image_url=image_url,
-                ingredients=ingredients,
-            ))
+            dish.ingredients = ingredients
+            dishes.append(dish)
         return dishes
 
-    def _get_dish_ingredients(self, row) -> str:
+    def _get_dish_ingredients(self, row: dict) -> str:
         """
         Extract ingredients from json.
 
@@ -81,7 +75,7 @@ class SearchByIngredientsRequest:
 
     def _format_ingredients(self, ingredients: list[str]) -> str:
         """
-        Format list of ingredients to str.
+        Format list of ingredients to str with numeration.
 
         :param ingredients: list of ingredients
         :return: str
