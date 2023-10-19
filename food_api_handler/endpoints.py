@@ -2,21 +2,10 @@
 import os
 from typing import Optional
 
-from pydantic import BaseModel, Field
 
 from web_utils import get_request
-
+from dto_models import DishDTO
 FOOD_API_TOKEN = os.environ.get('FOOD_API_TOKEN')
-
-
-class DishApiRepr(BaseModel):
-    """Representation of dish api object."""
-
-    title: str
-    id: int
-    image_url: str = Field(alias='image')
-    ingredients: str = ""
-    instruction: str = ""
 
 
 class SearchByIngredientsRequest:
@@ -43,15 +32,15 @@ class SearchByIngredientsRequest:
         # print(response.url)
         return response.json()
 
-    def init_dishes(self) -> list[DishApiRepr]:
+    def init_dishes(self) -> list[DishDTO]:
         """
         Extract from the json require dish info.
 
         :return: tuple(title, id, image_url)
         """
-        dishes: list[DishApiRepr] = []
+        dishes: list[DishDTO] = []
         for i in range(len(self.raw_json)):
-            dish = DishApiRepr.model_validate(self.raw_json[i])
+            dish = DishDTO.model_validate(self.raw_json[i])
             ingredients = self._get_dish_ingredients(self.raw_json[i])
             dish.ingredients = ingredients
             dishes.append(dish)

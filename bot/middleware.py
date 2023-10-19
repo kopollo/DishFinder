@@ -2,9 +2,9 @@
 from aiogram import types
 from aiogram.dispatcher.middlewares import BaseMiddleware
 
-from .context import TelegramUser
-from .utils import init_fsm_proxy, get_chat_id, get_cur_state
-from .setup import db_manager
+from dto_models import UserDTO
+from .utils import init_fsm_proxy, get_chat_id, get_cur_state, init_user_by_update
+from .setup import user_service
 
 
 class CheckUserMiddleware(BaseMiddleware):
@@ -20,9 +20,9 @@ class CheckUserMiddleware(BaseMiddleware):
         state = get_cur_state(user_id)
         async with state.proxy() as data:
             if not data:
-                user: TelegramUser = TelegramUser.init_by_update(update)
-                if not db_manager.get_user(user_id):
-                    db_manager.add_user(user)
+                user: UserDTO = init_user_by_update(update)
+                if not user_service.get(user_id):
+                    user_service.save(user)
                 to_store = {
                     'chat_id': user_id,
                     'cur_dish_id': 0,

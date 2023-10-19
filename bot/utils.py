@@ -3,13 +3,16 @@ from typing import Union
 
 from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
+
+from dto_models import UserDTO, DishDTO
+from services import dish_service
 from .keboards import StartKeyboard
-from .context import DishInBotRepr, TelegramUser
-from .setup import bot, dp, db_manager, lang_translator
+# from .context import DishInBotRepr, TelegramUser
+from .setup import bot, dp, lang_translator, user_service
 import logging
 
 
-def get_cur_dish(data: FSMContextProxy) -> DishInBotRepr:
+def get_cur_dish(data: FSMContextProxy) -> DishDTO:
     """
     Extract dish from context manager.
 
@@ -19,7 +22,7 @@ def get_cur_dish(data: FSMContextProxy) -> DishInBotRepr:
     return data['dishes'][data['cur_dish_id']]
 
 
-def get_cur_user(data: FSMContextProxy) -> TelegramUser:
+def get_cur_user(data: FSMContextProxy) -> UserDTO:
     """
     Extract user from context manager.
 
@@ -69,24 +72,6 @@ async def to_start(update: Union[types.Message, types.CallbackQuery],
     )
 
 
-def filter_dishes(dishes: list[DishInBotRepr]) -> list[DishInBotRepr]:
-    """Limit the number of dishes shown to the user to 10."""
-    return dishes[:10]
-
-
-def format_dishes_for_message(dishes: list[DishInBotRepr]) -> str:
-    """
-    Format dishes for bot message to show user.
-
-    :param dishes: list of dishes
-    :return: str
-    """
-    ans = ''
-    for i, dish in enumerate(dishes):
-        ans += f'{i}) {dish.title}\n'
-    return ans
-
-
 async def init_fsm_proxy(state: FSMContext, to_store: dict):
     """
     Initialize user session dict with data.
@@ -100,21 +85,22 @@ async def init_fsm_proxy(state: FSMContext, to_store: dict):
             data[key] = value
 
 
-def get_user_dishes(user_id: int) -> list[DishInBotRepr]:
-    """Get last 10 dishes from db_manager."""
-    dishes = filter_dishes(
-        db_manager.get_user_dishes(user_id)
-    )
-    return dishes
+# def get_user_dishes(user_id: int) -> list[DishDTO]:
+#     """Get last 10 dishes from db_manager."""
+#     dishes = user_service.get_user_dishes(user_id)
+#     #  = filter_dishes(
+#     #     user_repository.get_all_user_dishes(user_id)
+#     # )
+#     return dishes
 
 
-async def save_history_dish_in_proxy(dish: DishInBotRepr, state: FSMContext):
+async def save_history_dish_in_proxy(dish: DishDTO, state: FSMContext):
     """Save chose dish from history to proxy."""
     async with state.proxy() as data:
         data['history_dish'] = dish
 
 
-async def get_proxy_history_dish(state: FSMContext) -> DishInBotRepr:
+async def get_proxy_history_dish(state: FSMContext) -> DishDTO:
     """Get saved dish in proxy."""
     async with state.proxy() as data:
         return data['history_dish']
@@ -142,7 +128,7 @@ async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
     :param keyboard: KeyboardMarkup
     :return: None
     """
-    user_lang = db_manager.get_user(get_chat_id(update)).language
+    user_lang = user_service.get(get_chat_id(update)).language
     text = lang_translator.translate(text=text, to_lang=user_lang)
     await bot.send_message(
         chat_id=get_chat_id(update),
@@ -153,7 +139,7 @@ async def send_text_msg(update: Union[types.Message, types.CallbackQuery],
 
 async def send_msg_with_dish(
         update: Union[types.Message, types.CallbackQuery],
-        dish: DishInBotRepr,
+        dish: DishDTO,
         keyboard=None) -> None:
     """
     Send message with dish info.
@@ -163,7 +149,7 @@ async def send_msg_with_dish(
     :param keyboard: KeyboardMarkup
     :return: None
     """
-    user_lang = db_manager.get_user(get_chat_id(update)).language
+    user_lang = user_service.get(get_chat_id(update)).language
     text = lang_translator.translate(text=dish.preview(), to_lang=user_lang)
     # text = LangChecker(get_chat_id(update)).to_user_lang(dish.preview())
     logging.info(dish.title + " " + str(update.from_user.id))
@@ -172,4 +158,19 @@ async def send_msg_with_dish(
         reply_markup=keyboard,
         photo=dish.image_url,
         caption=text,
+    )
+
+
+def init_user_by_update(update: Union[types.Message, types.CallbackQuery]):
+    """
+    Init UserDTO object by update.
+
+    :param update: aiogram object with input data
+    :return: TelegramUser
+    """
+    return UserDTO(
+        first_name=update.from_user.first_name,
+        last_name=update.from_user.last_name,
+        tg_id=update.from_user.id,
+        language="en",
     )

@@ -3,12 +3,12 @@ from aiogram.utils.exceptions import MessageNotModified
 from .keboards import HistoryKeyboard, HistoryDishInstructionKeyboard, \
     StartKeyboard, HistoryDishInfoKeyboard, ChooseDishKeyboard
 from .utils import *
-from .context import DishInBotRepr
 from .msg_templates import *
+from dto_models import DishDTO, UserDTO
 
 
 async def update_dish_message(callback: types.CallbackQuery,
-                              dish: DishInBotRepr) -> None:
+                              dish: DishDTO) -> None:
     """
     Update dish message to implement pagination.
 
@@ -16,7 +16,7 @@ async def update_dish_message(callback: types.CallbackQuery,
     :param dish: DishInBotRepr object
     :return: None
     """
-    user_lang = db_manager.get_user(get_chat_id(callback)).language
+    user_lang = user_service.get(get_chat_id(callback)).language
     caption = lang_translator.translate(text=dish.preview(), to_lang=user_lang)
     photo = types.InputMediaPhoto(media=dish.image_url,
                                   caption=caption)
@@ -48,7 +48,7 @@ async def send_cur_dish_info(
     """Send current dish in search queue."""
     state = get_cur_state(get_chat_id(update))
     async with state.proxy() as data:
-        dish: DishInBotRepr = get_cur_dish(data)
+        dish: DishDTO = get_cur_dish(data)
         await send_msg_with_dish(
             update=update,
             keyboard=ChooseDishKeyboard(),
@@ -59,11 +59,12 @@ async def send_cur_dish_info(
 async def send_history_widget(
         update: Union[types.Message, types.CallbackQuery]) -> None:
     """Send widget with dishes in history."""
-    dishes: list[DishInBotRepr] = get_user_dishes(get_chat_id(update))
+    dishes: list[DishDTO] = user_service.get_user_dishes(get_chat_id(update))
     if not dishes:
         await to_start(update=update, text=SORRY)
         return None
     await send_text_msg(
         update=update,
-        text=format_dishes_for_message(dishes),
-        keyboard=HistoryKeyboard(dishes), )
+        text=user_service.convert_dishes_list_to_str(dishes),
+        keyboard=HistoryKeyboard(dishes),
+    )

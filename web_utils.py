@@ -1,4 +1,6 @@
 import requests
+
+
 def get_request(server: str, params: dict[str, str] = None):
     """
     Make GET request to server with given params.

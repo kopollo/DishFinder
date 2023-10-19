@@ -2,7 +2,7 @@ import json
 
 import responses
 
-from food_api_handler.requests_wrapper import SearchByIngredientsRequest, \
+from food_api_handler.endpoints import SearchByIngredientsRequest, \
     GetRecipeInstructionsRequest, DishApiRepr
 
 TEST_DISH_ID = 633547
