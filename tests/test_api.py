@@ -3,7 +3,8 @@ import json
 import responses
 
 from food_api_handler.endpoints import SearchByIngredientsRequest, \
-    GetRecipeInstructionsRequest, DishApiRepr
+    GetRecipeInstructionsRequest
+from services.dto_models import DishDTO
 
 TEST_DISH_ID = 633547
 
@@ -45,7 +46,7 @@ def test_init_dishes_with_correct_ingredients():
         "instruction": ''
     }
     dishes_ans = [
-        DishApiRepr.model_validate(data)
+        DishDTO.model_validate(data)
     ]
     assert dishes == dishes_ans
 

@@ -1,7 +1,7 @@
 """Contain keyboards."""
 from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup, \
     KeyboardButton, InlineKeyboardButton
-from .context import DishDTO
+from services.dto_models import DishDTO, UserDTO
 
 
 class StartKeyboard:

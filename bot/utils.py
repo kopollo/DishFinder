@@ -4,10 +4,8 @@ from typing import Union
 from aiogram.dispatcher.storage import FSMContextProxy, FSMContext
 from aiogram import types
 
-from dto_models import UserDTO, DishDTO
-from services import dish_service
+from services.dto_models import DishDTO, UserDTO
 from .keboards import StartKeyboard
-# from .context import DishInBotRepr, TelegramUser
 from .setup import bot, dp, lang_translator, user_service
 import logging
 

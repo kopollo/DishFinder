@@ -1,8 +1,7 @@
 """Contain message and callback handlers."""
 from aiogram.utils import executor
 
-from dto_models import DishDTO, UserDTO
-from .context import FindDishState
+from .fsm_plan import FindDishState
 from .middleware import CheckUserMiddleware
 from .messages import *
 from .msg_templates import *

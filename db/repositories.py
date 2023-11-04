@@ -1,10 +1,8 @@
-import abc
-
 from sqlalchemy import desc
 
-from db import UserModel, DishModel, db_session, UsersToDishesModel
+from db import UserModel, DishModel, UsersToDishesModel
 from .mappers import dish_mapper, user_mapper
-from dto_models import DishDTO, UserDTO
+from services.dto_models import DishDTO, UserDTO
 
 
 class DishRepository:

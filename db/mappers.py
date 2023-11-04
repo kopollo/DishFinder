@@ -1,7 +1,7 @@
 from sqlalchemy import inspect
 
-from db import UserModel, DishModel, db_session, UsersToDishesModel
-from dto_models import DishDTO, UserDTO
+from db import UserModel, DishModel
+from services.dto_models import DishDTO, UserDTO
 
 
 # Alternatively can create generic mapper, but have to add generic interface for dto

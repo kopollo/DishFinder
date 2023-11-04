@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, AliasChoices
 class DishDTO(BaseModel):
     title: str
     id: int
-    image_url: str = Field(validation_alias=AliasChoices('image', 'image_url'))
+    image_url: str = Field(validation_alias=AliasChoices('image', 'image_url'), default=None)
     ingredients: str = ""
     instruction: str = ""
 

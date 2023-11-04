@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from db import db_session, UserModel
 from db.db_session import SqlAlchemyBase
 from db.dishes import DishModel
-import db.repositories as DBManager
+from db.repositories import DishRepository, UserRepository
+from services.dto_models import DishDTO
 
 test_db_url = f'sqlite:///tests/test_dish_finder.db?check_same_thread=False'
 
@@ -33,26 +34,40 @@ def session(engine):
 
 
 @pytest.fixture
-def mock_db_manager(monkeypatch, correct_dish, session):
+def dish_repository(monkeypatch, correct_dish, session):
     """Create db_manager with replaced mock session creator."""
 
     def mockreturn():
         return session
 
-    db_manager = DBManager
+    dish_repository = DishRepository(db_session)
     monkeypatch.setattr(
         db_session, "create_session", mockreturn)
-    yield db_manager
+    yield dish_repository
+
+
+# @pytest.fixture
+# def user_repository(monkeypatch, session):
+#     """Create db_manager with replaced mock session creator."""
+#
+#     def mockreturn():
+#         return session
+#
+#     user_repository = UserRepository(db_session)
+#     monkeypatch.setattr(
+#         db_session, "create_session", mockreturn)
+#     yield user_repository
 
 
 @pytest.fixture
 def correct_dish():
-    dish = DishModel(
-        id=1,
-        title='x',
-        instruction="x",
-    )
-    yield dish
+    d = {
+        "id": 1,
+        "title": 'xx',
+        "instruction": "xx",
+    }
+    # dish =
+    yield DishDTO.model_validate(d)
 
 
 @pytest.fixture

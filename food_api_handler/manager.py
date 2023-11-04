@@ -1,5 +1,5 @@
 """Contain DishBotController."""
-from dto_models import DishDTO
+from services.dto_models import DishDTO
 from .endpoints import SearchByIngredientsRequest, \
     GetRecipeInstructionsRequest
 

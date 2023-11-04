@@ -1,10 +1,9 @@
 """Contain functions that control bot messages."""
 from aiogram.utils.exceptions import MessageNotModified
-from .keboards import HistoryKeyboard, HistoryDishInstructionKeyboard, \
-    StartKeyboard, HistoryDishInfoKeyboard, ChooseDishKeyboard
+from .keboards import HistoryKeyboard, HistoryDishInfoKeyboard, ChooseDishKeyboard
 from .utils import *
 from .msg_templates import *
-from dto_models import DishDTO, UserDTO
+from services.dto_models import DishDTO
 
 
 async def update_dish_message(callback: types.CallbackQuery,

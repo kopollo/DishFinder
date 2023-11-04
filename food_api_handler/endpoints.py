@@ -4,7 +4,7 @@ from typing import Optional
 
 
 from web_utils import get_request
-from dto_models import DishDTO
+from services.dto_models import DishDTO
 FOOD_API_TOKEN = os.environ.get('FOOD_API_TOKEN')
 
 
