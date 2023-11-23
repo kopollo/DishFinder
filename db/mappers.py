@@ -17,6 +17,8 @@ class DishMapper:
         return DishModel(**dish_dto.model_dump())
 
     def to_dto(self, model: DishModel) -> DishDTO:
+        if model is None:
+            return None
         return DishDTO.model_validate(object_as_dict(model))
 
 
@@ -25,6 +27,8 @@ class UserMapper:
         return UserModel(**dto.model_dump())
 
     def to_dto(self, model: UserModel) -> UserDTO:
+        if model is None:
+            return None
         return UserDTO.model_validate(object_as_dict(model))
 
 

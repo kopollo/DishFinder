@@ -22,8 +22,6 @@ class CheckUserMiddleware(BaseMiddleware):
             if not data:
                 user: UserDTO = init_user_by_update(update)
                 if not user_service.get(user_id):
-                    # print('XXXXXXXXXX')
-                    # print()
                     user_service.save(user)
                 to_store = {
                     'chat_id': user_id,
